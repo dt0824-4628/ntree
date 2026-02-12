@@ -22,67 +22,83 @@ class NodeFactory:
         self._ip_provider = ip_provider
         self._nodes: Dict[str, TreeNode] = {}  # node_id -> TreeNode
 
-    def create_root_node(self, name: str, metadata: Optional[Dict[str, Any]] = None) -> TreeNode:
-        """
-        创建根节点
+    def create_root_node(self, name: str, metadata: Optional[Dict] = None) -> TreeNode:
+        """创建根节点"""
+        # ✅ 先生成 node_id
+        node_id = self._generate_node_id()
+        ip = self._ip_provider.allocate_root_ip()
 
-        Args:
-            name: 节点名称
-            metadata: 节点元数据
+        # 先定义默认值
+        storage = None
+        tree_id = None
 
-        Returns:
-            创建的根节点
-        """
-        # 获取根IP地址
-        root_ip = self._ip_provider.allocate_root_ip()
+        # 从metadata中提取参数
+        if metadata:
+            storage = metadata.get('storage')
+            tree_id = metadata.get('tree_id_for_storage') or metadata.get('tree_id')
 
-        # 创建根节点
         node = TreeNode(
+            node_id=node_id,  # ✅ 使用生成的 node_id
             name=name,
-            ip_address=root_ip,
+            ip=ip,
             level=0,
-            parent=None,
-            metadata=metadata
+            storage=storage,
+            tree_id=tree_id
         )
 
-        # 注册节点
-        self._register_node(node)
+        # 设置节点标签
+        node.add_tag("root")
+        if metadata:
+            for key, value in metadata.items():
+                if key not in ['storage', 'tree_id', 'tree_id_for_storage']:
+                    node.add_tag(f"{key}:{value}")
+
         return node
 
-    def create_child_node(self, parent: TreeNode, name: str,
-                          metadata: Optional[Dict[str, Any]] = None) -> TreeNode:
-        """
-        创建子节点
+    def create_child_node(
+            self,
+            parent_node: TreeNode,
+            name: str,
+            metadata: Optional[Dict] = None
+    ) -> TreeNode:
+        """创建子节点"""
+        # ✅ 先生成 node_id
+        node_id = self._generate_node_id()
+        child_ip = self._ip_provider.allocate_child_ip(parent_node.ip)
 
-        Args:
-            parent: 父节点
-            name: 节点名称
-            metadata: 节点元数据
+        # 先定义默认值
+        storage = None
+        tree_id = None
 
-        Returns:
-            创建的子节点
-        """
-        # 为父节点分配子IP地址
-        try:
-            child_ip = self._ip_provider.allocate_child_ip(parent.ip_address)
-        except Exception as e:
-            raise NodeError(f"无法为节点分配IP地址: {e}")
+        # 从metadata中提取参数
+        if metadata:
+            storage = metadata.get('storage')
+            tree_id = metadata.get('tree_id_for_storage') or metadata.get('tree_id')
 
-        # 创建子节点
         node = TreeNode(
+            node_id=node_id,  # ✅ 使用生成的 node_id
             name=name,
-            ip_address=child_ip,
-            level=parent.level + 1,
-            parent=parent,
-            metadata=metadata
+            ip=child_ip,
+            level=parent_node.level + 1,
+            storage=storage,
+            tree_id=tree_id
         )
 
-        # 添加到父节点
-        parent.add_child(node)
+        # 设置父子关系
+        parent_node.add_child(node)
 
-        # 注册节点
-        self._register_node(node)
+        # 设置节点标签
+        if metadata:
+            for key, value in metadata.items():
+                if key not in ['storage', 'tree_id', 'tree_id_for_storage']:
+                    node.add_tag(f"{key}:{value}")
+
         return node
+
+    def _generate_node_id(self) -> str:
+        """生成唯一的节点ID"""
+        import uuid
+        return str(uuid.uuid4())[:8]
 
     def create_node_from_dict(self, data: Dict[str, Any]) -> TreeNode:
         """

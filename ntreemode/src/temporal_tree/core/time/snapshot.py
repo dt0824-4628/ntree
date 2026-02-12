@@ -2,10 +2,11 @@
 快照系统
 为节点或树创建状态快照
 """
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional, List, Union
 from datetime import datetime
 import hashlib
 import json
+import uuid
 
 from ...exceptions import TimeError
 from ...core.node.entity import TreeNode
@@ -21,233 +22,182 @@ class DateTimeEncoder(json.JSONEncoder):
         return super().default(obj)
 
 
+class NodeSnapshot:
+    """节点快照"""
+    def __init__(self, snapshot_id: str, node_id: str, node_state: Dict,
+                 timestamp: datetime, metadata: Optional[Dict] = None):
+        self.snapshot_id = snapshot_id
+        self.node_id = node_id
+        self.node_state = node_state
+        self.timestamp = timestamp
+        self.metadata = metadata or {}
+
+
+class TreeSnapshot:
+    """树快照"""
+    def __init__(self, snapshot_id: str, tree_id: str, tree_state: Dict,
+                 timestamp: datetime, metadata: Optional[Dict] = None):
+        self.snapshot_id = snapshot_id
+        self.tree_id = tree_id
+        self.tree_state = tree_state
+        self.timestamp = timestamp
+        self.metadata = metadata or {}
+
+
 class SnapshotSystem:
     """快照系统 - 管理对象状态快照"""
 
     def __init__(self):
         self._timelines: Dict[str, Timeline] = {}  # object_id -> Timeline
+        self._snapshots: Dict[str, Union[NodeSnapshot, TreeSnapshot]] = {}  # snapshot_id -> Snapshot
 
-    def create_node_snapshot(self, node: TreeNode,
-                            timestamp: Optional[datetime] = None,
-                            comment: str = "") -> str:
-        """
-        创建节点快照
+    def _generate_snapshot_id(self) -> str:
+        """生成唯一的快照ID"""
+        return f"snap_{datetime.now().strftime('%Y%m%d%H%M%S')}_{str(uuid.uuid4())[:8]}"
 
-        Args:
-            node: 节点对象
-            timestamp: 快照时间，None表示当前时间
-            comment: 快照注释
-
-        Returns:
-            快照ID（哈希值）
-        """
-        if timestamp is None:
-            timestamp = datetime.now()
+    def create_node_snapshot(
+        self,
+        node: 'TreeNode',
+        timestamp: Optional[datetime] = None,
+        metadata: Optional[Dict] = None
+    ) -> NodeSnapshot:
+        """创建节点快照"""
+        snapshot_id = self._generate_snapshot_id()
+        ts = timestamp or datetime.now()
 
         # 获取节点状态
-        node_state = node.to_dict(include_children=False, include_data=True)
+        node_state = node.to_dict()
 
-        # 计算快照ID（基于内容和时间）
-        snapshot_data = {
-            'node_id': node.node_id,
-            'timestamp': timestamp,
-            'state': node_state
-        }
-
-        snapshot_json = json.dumps(snapshot_data, sort_keys=True, cls=DateTimeEncoder)
-        snapshot_id = hashlib.md5(snapshot_json.encode()).hexdigest()[:16]
-
-        # 获取或创建时间线
-        timeline = self._get_timeline(node.node_id, 'node')
-
-        # 添加快照
-        timeline.add_time_point(
-            timestamp=timestamp,
-            data={
-                'snapshot_id': snapshot_id,
-                'node_state': node_state,
-                'type': 'snapshot'
-            },
-            metadata={
-                'comment': comment,
-                'created_by': 'snapshot_system'
-            }
+        # 创建快照对象
+        snapshot = NodeSnapshot(
+            snapshot_id=snapshot_id,
+            node_id=node.node_id,
+            node_state=node_state,
+            timestamp=ts,
+            metadata=metadata or {}
         )
 
-        return snapshot_id
+        # 保存快照
+        self._snapshots[snapshot_id] = snapshot
 
-    def create_tree_snapshot(self, repository: NodeRepository,
-                           timestamp: Optional[datetime] = None,
-                           comment: str = "") -> str:
+        return snapshot
+
+    def create_tree_snapshot(
+        self,
+        root_node: 'TreeNode',
+        timestamp: Optional[datetime] = None,
+        metadata: Optional[Dict] = None
+    ) -> TreeSnapshot:
         """
         创建整棵树快照
 
         Args:
-            repository: 节点仓库
+            root_node: 树的根节点
             timestamp: 快照时间
-            comment: 快照注释
+            metadata: 元数据
 
         Returns:
-            快照ID
+            树快照对象
         """
-        if timestamp is None:
-            timestamp = datetime.now()
+        snapshot_id = self._generate_snapshot_id()
+        ts = timestamp or datetime.now()
 
-        # 获取树状态
-        tree_state = repository.to_dict(include_data=True)
-
-        # 使用根节点ID作为对象ID
-        object_id = f"tree_{repository.root.node_id if repository.root else 'unknown'}"
-
-        # 计算快照ID
-        snapshot_data = {
-            'tree_state': tree_state,
-            'timestamp': timestamp
+        # 获取树状态 - 递归获取所有节点
+        tree_state = {
+            'root_node': root_node.to_dict(),
+            'all_nodes': [n.to_dict() for n in root_node.get_descendants()]
         }
 
-        snapshot_json = json.dumps(snapshot_data, sort_keys=True, cls=DateTimeEncoder)
-        snapshot_id = hashlib.md5(snapshot_json.encode()).hexdigest()[:16]
-
-        # 获取或创建时间线
-        timeline = self._get_timeline(object_id, 'tree')
-
-        # 添加快照
-        timeline.add_time_point(
-            timestamp=timestamp,
-            data={
-                'snapshot_id': snapshot_id,
-                'tree_state': tree_state,
-                'type': 'tree_snapshot'
-            },
-            metadata={
-                'comment': comment,
-                'node_count': repository.get_node_count(),
-                'tree_depth': repository.get_tree_depth()
-            }
+        # 创建快照对象
+        snapshot = TreeSnapshot(
+            snapshot_id=snapshot_id,
+            tree_id=f"tree_{root_node.node_id}",
+            tree_state=tree_state,
+            timestamp=ts,
+            metadata=metadata or {}
         )
 
-        return snapshot_id
+        # 保存快照
+        self._snapshots[snapshot_id] = snapshot
 
-    def restore_node_snapshot(self, node_id: str,
-                            snapshot_id: Optional[str] = None,
-                            timestamp: Optional[datetime] = None) -> Optional[Dict[str, Any]]:
+        return snapshot
+
+    def restore_node_snapshot(self, snapshot_id: str) -> Optional[Dict[str, Any]]:
         """
         恢复节点快照
 
         Args:
-            node_id: 节点ID
-            snapshot_id: 快照ID，如果为None则使用时间戳
-            timestamp: 时间戳，如果指定则恢复该时间点的状态
+            snapshot_id: 快照ID
 
         Returns:
             节点状态字典，如果找不到返回None
         """
-        timeline = self._timelines.get(f"node_{node_id}")
-        if not timeline:
-            return None
-
-        time_point = None
-
-        if snapshot_id:
-            # 根据快照ID查找
-            for tp in timeline.get_time_points():
-                if tp.data.get('snapshot_id') == snapshot_id:
-                    time_point = tp
-                    break
-        elif timestamp:
-            # 根据时间戳查找
-            time_point = timeline.get_nearest_time_point(timestamp)
-
-        if time_point and 'node_state' in time_point.data:
-            return time_point.data['node_state']
-
+        snapshot = self._snapshots.get(snapshot_id)
+        if snapshot and isinstance(snapshot, NodeSnapshot):
+            return snapshot.node_state
         return None
 
-    def get_node_snapshots(self, node_id: str,
-                          start_time: Optional[datetime] = None,
-                          end_time: Optional[datetime] = None) -> List[Dict[str, Any]]:
+    def restore_tree_snapshot(self, snapshot_id: str) -> Optional[Dict[str, Any]]:
         """
-        获取节点快照列表
+        恢复树快照
+
+        Args:
+            snapshot_id: 快照ID
+
+        Returns:
+            树状态字典，如果找不到返回None
+        """
+        snapshot = self._snapshots.get(snapshot_id)
+        if snapshot and isinstance(snapshot, TreeSnapshot):
+            return snapshot.tree_state
+        return None
+
+    def get_node_snapshots(self, node_id: str) -> List[NodeSnapshot]:
+        """
+        获取节点的所有快照
 
         Args:
             node_id: 节点ID
-            start_time: 开始时间
-            end_time: 结束时间
 
         Returns:
             快照列表
         """
-        timeline = self._timelines.get(f"node_{node_id}")
-        if not timeline:
-            return []
-
-        time_points = timeline.get_time_range(start_time, end_time)
-
         snapshots = []
-        for tp in time_points:
-            if tp.data.get('type') == 'snapshot':
-                snapshots.append({
-                    'snapshot_id': tp.data.get('snapshot_id'),
-                    'timestamp': tp.timestamp,
-                    'comment': tp.metadata.get('comment', ''),
-                    'data_summary': {
-                        'dimensions': list(tp.data.get('node_state', {}).get('data', {}).keys())
-                    }
-                })
+        for snapshot in self._snapshots.values():
+            if isinstance(snapshot, NodeSnapshot) and snapshot.node_id == node_id:
+                snapshots.append(snapshot)
 
+        # 按时间倒序排序
+        snapshots.sort(key=lambda x: x.timestamp, reverse=True)
         return snapshots
 
-    def _get_timeline(self, object_id: str, object_type: str) -> Timeline:
-        """获取或创建时间线"""
-        key = f"{object_type}_{object_id}"
+    def get_tree_snapshots(self, tree_id: str) -> List[TreeSnapshot]:
+        """
+        获取树的所有快照
 
-        if key not in self._timelines:
-            self._timelines[key] = Timeline(object_id, object_type)
+        Args:
+            tree_id: 树ID
 
-        return self._timelines[key]
+        Returns:
+            快照列表
+        """
+        snapshots = []
+        for snapshot in self._snapshots.values():
+            if isinstance(snapshot, TreeSnapshot) and snapshot.tree_id == tree_id:
+                snapshots.append(snapshot)
 
-    def get_timeline(self, object_id: str, object_type: str = "node") -> Optional[Timeline]:
-        """获取时间线"""
-        key = f"{object_type}_{object_id}"
-        return self._timelines.get(key)
+        # 按时间倒序排序
+        snapshots.sort(key=lambda x: x.timestamp, reverse=True)
+        return snapshots
 
-    def delete_timeline(self, object_id: str, object_type: str = "node") -> bool:
-        """删除时间线"""
-        key = f"{object_type}_{object_id}"
-        if key in self._timelines:
-            del self._timelines[key]
+    def delete_snapshot(self, snapshot_id: str) -> bool:
+        """删除快照"""
+        if snapshot_id in self._snapshots:
+            del self._snapshots[snapshot_id]
             return True
         return False
 
-    def save_all(self, base_path: str) -> bool:
-        """保存所有时间线"""
-        try:
-            import os
-            os.makedirs(base_path, exist_ok=True)
-
-            for key, timeline in self._timelines.items():
-                filepath = os.path.join(base_path, f"{key}.json")
-                timeline.save_to_json(filepath)
-
-            return True
-        except Exception as e:
-            raise TimeError(f"保存快照系统失败: {e}")
-
-    def load_all(self, base_path: str) -> bool:
-        """加载所有时间线"""
-        try:
-            import os
-            import glob
-
-            pattern = os.path.join(base_path, "*.json")
-            for filepath in glob.glob(pattern):
-                try:
-                    timeline = Timeline.load_from_json(filepath)
-                    key = f"{timeline.object_type}_{timeline.object_id}"
-                    self._timelines[key] = timeline
-                except Exception as e:
-                    print(f"加载时间线失败 {filepath}: {e}")
-
-            return True
-        except Exception as e:
-            raise TimeError(f"加载快照系统失败: {e}")
+    def clear(self):
+        """清空所有快照"""
+        self._snapshots.clear()
+        self._timelines.clear()

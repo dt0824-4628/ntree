@@ -1,346 +1,248 @@
 """
 内存存储实现
-数据保存在内存中，程序结束即消失
+将所有数据存储在内存字典中，程序结束即消失
+适用于测试、缓存、临时计算
 """
-import threading
-from typing import Dict, List, Any, Optional
-from datetime import datetime
-from collections import defaultdict
 
-from ..serializer import JSONSerializer
-from .adapter import DataStoreAdapter
-from ...exceptions import DataStoreError, TreeNotFoundError, NodeNotFoundError
+from typing import Any, Optional, List, Tuple, Dict
+from datetime import datetime
+from .adapter import DataStoreAdapter, TimePointMetadata
 
 
 class MemoryStore(DataStoreAdapter):
-    """内存存储实现"""
+    """内存存储 - 所有数据存在字典里"""
 
-    def __init__(self, serializer=None):
-        """
-        初始化内存存储
+    def __init__(self):
+        """初始化内存存储"""
+        # 数据结构：
+        # self._data[tree_id][node_id][dimension][timestamp] = (value, metadata)
+        self._data: Dict[str, Dict[str, Dict[str, Dict[str, Tuple[Any, Dict]]]]] = {}
 
-        Args:
-            serializer: 序列化器，默认为JSONSerializer
-        """
-        self.serializer = serializer or JSONSerializer()
-        self._lock = threading.RLock()  # 线程安全锁
+        # 树结构数据（兼容老接口）
+        self._trees: Dict[str, Dict] = {}
+        self._nodes: Dict[str, Dict[str, Dict]] = {}
 
-        # 内存数据结构
-        self._trees: Dict[str, Dict] = {}  # tree_id -> tree_data
-        self._nodes: Dict[str, Dict[str, Dict]] = defaultdict(dict)  # tree_id -> {node_id -> node_data}
-        self._node_data: Dict[str, Dict[str, Dict[str, List]]] = defaultdict(
-            lambda: defaultdict(lambda: defaultdict(list))
-        )  # tree_id -> node_id -> dimension -> [data_points]
+    # ========== 原有接口实现（保持不变） ==========
 
-        # 索引
-        self._tree_by_name: Dict[str, str] = {}  # tree_name -> tree_id
-        self._node_by_ip: Dict[str, Dict[str, str]] = defaultdict(dict)  # tree_id -> ip -> node_id
-
-    def save_tree(self, tree_data: Dict[str, Any]) -> bool:
-        """保存树数据"""
-        with self._lock:
-            tree_id = tree_data.get('tree_id')
-            if not tree_id:
-                raise DataStoreError("树数据缺少tree_id")
-
-            # 保存树
-            self._trees[tree_id] = tree_data.copy()
-
-            # 建立名称索引
-            tree_name = tree_data.get('name')
-            if tree_name:
-                self._tree_by_name[tree_name] = tree_id
-
-            # 保存根节点
-            root_node = tree_data.get('root_node')
-            if root_node:
-                self.save_node(tree_id, root_node)
-
-            return True
+    def save_tree(self, tree_id: str, tree_data: Dict[str, Any]) -> None:
+        """保存整棵树的结构数据"""
+        self._trees[tree_id] = tree_data
 
     def load_tree(self, tree_id: str) -> Optional[Dict[str, Any]]:
-        """加载树数据"""
-        with self._lock:
-            if tree_id not in self._trees:
-                raise TreeNotFoundError(f"树不存在: {tree_id}")
+        """加载整棵树的结构数据"""
+        return self._trees.get(tree_id)
 
-            tree_data = self._trees[tree_id].copy()
-
-            # 获取所有节点
-            if tree_id in self._nodes:
-                tree_data['nodes'] = list(self._nodes[tree_id].values())
-
-            return tree_data
-
-    def delete_tree(self, tree_id: str) -> bool:
-        """删除树及其所有数据"""
-        with self._lock:
-            if tree_id not in self._trees:
-                return False
-
-            # 删除树
-            tree_data = self._trees.pop(tree_id)
-
-            # 删除名称索引
-            tree_name = tree_data.get('name')
-            if tree_name and tree_name in self._tree_by_name:
-                self._tree_by_name.pop(tree_name, None)
-
-            # 删除所有节点
-            if tree_id in self._nodes:
-                self._nodes.pop(tree_id, None)
-
-            # 删除所有节点数据
-            if tree_id in self._node_data:
-                self._node_data.pop(tree_id, None)
-
-            # 删除IP索引
-            if tree_id in self._node_by_ip:
-                self._node_by_ip.pop(tree_id, None)
-
-            return True
-
-    def list_trees(self) -> List[Dict[str, Any]]:
-        """列出所有树"""
-        with self._lock:
-            trees = []
-            for tree_id, tree_data in self._trees.items():
-                tree_info = tree_data.copy()
-
-                # 添加统计信息
-                node_count = len(self._nodes.get(tree_id, {}))
-                tree_info['node_count'] = node_count
-
-                trees.append(tree_info)
-
-            return trees
-
-    def save_node(self, tree_id: str, node_data: Dict[str, Any]) -> bool:
-        """保存节点数据"""
-        with self._lock:
-            if tree_id not in self._trees:
-                raise TreeNotFoundError(f"树不存在: {tree_id}")
-
-            node_id = node_data.get('node_id')
-            if not node_id:
-                raise DataStoreError("节点数据缺少node_id")
-
-            # 保存节点
-            self._nodes[tree_id][node_id] = node_data.copy()
-
-            # 建立IP索引
-            ip_address = node_data.get('ip_address')
-            if ip_address:
-                self._node_by_ip[tree_id][ip_address] = node_id
-
-            return True
+    def save_node(self, tree_id: str, node_id: str, node_data: Dict[str, Any]) -> None:
+        """保存单个节点的数据"""
+        if tree_id not in self._nodes:
+            self._nodes[tree_id] = {}
+        self._nodes[tree_id][node_id] = node_data
 
     def load_node(self, tree_id: str, node_id: str) -> Optional[Dict[str, Any]]:
-        """加载节点数据"""
-        with self._lock:
-            if tree_id not in self._nodes:
-                raise TreeNotFoundError(f"树不存在: {tree_id}")
-
-            if node_id not in self._nodes[tree_id]:
-                raise NodeNotFoundError(f"节点不存在: {node_id}")
-
-            return self._nodes[tree_id][node_id].copy()
-
-    def load_all_nodes(self, tree_id: str) -> List[Dict[str, Any]]:
-        """加载树的所有节点"""
-        with self._lock:
-            if tree_id not in self._nodes:
-                return []
-
-            return [node.copy() for node in self._nodes[tree_id].values()]
+        """加载单个节点的数据"""
+        return self._nodes.get(tree_id, {}).get(node_id)
 
     def delete_node(self, tree_id: str, node_id: str) -> bool:
         """删除节点"""
-        with self._lock:
-            if tree_id not in self._nodes:
-                return False
-
-            if node_id not in self._nodes[tree_id]:
-                return False
-
-            # 删除IP索引
-            node_data = self._nodes[tree_id][node_id]
-            ip_address = node_data.get('ip_address')
-            if ip_address and tree_id in self._node_by_ip:
-                self._node_by_ip[tree_id].pop(ip_address, None)
-
-            # 删除节点
-            self._nodes[tree_id].pop(node_id, None)
-
-            # 删除节点数据
-            if (tree_id in self._node_data and
-                    node_id in self._node_data[tree_id]):
-                self._node_data[tree_id].pop(node_id, None)
-
+        if tree_id in self._nodes and node_id in self._nodes[tree_id]:
+            del self._nodes[tree_id][node_id]
             return True
+        return False
 
-    def save_node_data(
-            self,
-            tree_id: str,
-            node_id: str,
-            dimension: str,
-            value: Any,
-            timestamp: datetime
-    ) -> bool:
-        """保存节点维度数据"""
-        with self._lock:
-            # 检查树和节点是否存在
-            if tree_id not in self._trees:
-                raise TreeNotFoundError(f"树不存在: {tree_id}")
+    # ========== 新增接口实现：时间点存取 ==========
 
-            if tree_id not in self._nodes or node_id not in self._nodes[tree_id]:
-                raise NodeNotFoundError(f"节点不存在: {node_id}")
+    def save_time_point(
+        self,
+        tree_id: str,
+        node_id: str,
+        dimension: str,
+        timestamp: datetime,
+        value: Any,
+        quality: int = 1,
+        unit: Optional[str] = None
+    ) -> None:
+        """保存单个时间点数据"""
+        # 构建层级结构
+        if tree_id not in self._data:
+            self._data[tree_id] = {}
+        if node_id not in self._data[tree_id]:
+            self._data[tree_id][node_id] = {}
+        if dimension not in self._data[tree_id][node_id]:
+            self._data[tree_id][node_id][dimension] = {}
 
-            # 保存数据点
-            data_point = {
-                'value': value,
-                'timestamp': timestamp,
-                'dimension': dimension
-            }
+        # 时间戳转字符串作为key（保证JSON兼容）
+        ts_key = timestamp.isoformat()
 
-            self._node_data[tree_id][node_id][dimension].append(data_point)
+        # 构建元数据
+        metadata = TimePointMetadata(quality=quality, unit=unit).to_dict()
 
-            # 按时间排序（最新的在前）
-            self._node_data[tree_id][node_id][dimension].sort(
-                key=lambda x: x['timestamp'],
-                reverse=True
-            )
+        # 存储
+        self._data[tree_id][node_id][dimension][ts_key] = (value, metadata)
 
-            return True
+    def get_time_points(
+        self,
+        tree_id: str,
+        node_id: str,
+        dimension: str,
+        start_time: Optional[datetime] = None,
+        end_time: Optional[datetime] = None,
+        limit: Optional[int] = None
+    ) -> List[Tuple[datetime, Any, Dict]]:
+        """获取时间范围内的所有时间点"""
+        result = []
 
-    def load_node_data(
-            self,
-            tree_id: str,
-            node_id: str,
-            dimension: Optional[str] = None,
-            start_time: Optional[datetime] = None,
-            end_time: Optional[datetime] = None
-    ) -> Dict[str, Any]:
-        """加载节点维度数据"""
-        with self._lock:
-            if (tree_id not in self._node_data or
-                    node_id not in self._node_data[tree_id]):
-                return {}
-
-            node_dimensions = self._node_data[tree_id][node_id]
-            result = {}
-
-            if dimension:
-                # 获取特定维度
-                if dimension in node_dimensions:
-                    data_points = self._filter_by_time(
-                        node_dimensions[dimension],
-                        start_time,
-                        end_time
-                    )
-                    result[dimension] = data_points
-            else:
-                # 获取所有维度
-                for dim, data_points in node_dimensions.items():
-                    filtered_points = self._filter_by_time(
-                        data_points,
-                        start_time,
-                        end_time
-                    )
-                    if filtered_points:
-                        result[dim] = filtered_points
-
+        # 检查数据是否存在
+        if (tree_id not in self._data or
+            node_id not in self._data[tree_id] or
+            dimension not in self._data[tree_id][node_id]):
             return result
 
-    def _filter_by_time(
-            self,
-            data_points: List[Dict],
-            start_time: Optional[datetime],
-            end_time: Optional[datetime]
-    ) -> List[Dict]:
-        """按时间范围过滤数据点"""
-        filtered = []
+        # 遍历该维度的所有时间点
+        for ts_key, (value, metadata) in self._data[tree_id][node_id][dimension].items():
+            try:
+                timestamp = datetime.fromisoformat(ts_key)
 
-        for point in data_points:
-            timestamp = point['timestamp']
+                # 时间范围过滤
+                if start_time and timestamp < start_time:
+                    continue
+                if end_time and timestamp > end_time:
+                    continue
 
-            if start_time and timestamp < start_time:
+                result.append((timestamp, value, metadata))
+            except ValueError:
+                continue  # 跳过格式错误的时间戳
+
+        # 按时间排序（升序）
+        result.sort(key=lambda x: x[0])
+
+        # 限制数量
+        if limit and limit > 0:
+            result = result[:limit]
+
+        return result
+
+    def get_latest_time_point(
+        self,
+        tree_id: str,
+        node_id: str,
+        dimension: str,
+        before_time: Optional[datetime] = None
+    ) -> Optional[Tuple[datetime, Any, Dict]]:
+        """获取最新的时间点"""
+        points = self.get_time_points(tree_id, node_id, dimension, end_time=before_time)
+        return points[-1] if points else None
+
+    def delete_time_points(
+        self,
+        tree_id: str,
+        node_id: str,
+        dimension: str,
+        before_time: Optional[datetime] = None
+    ) -> int:
+        """删除时间点"""
+        deleted_count = 0
+
+        if (tree_id not in self._data or
+            node_id not in self._data[tree_id] or
+            dimension not in self._data[tree_id][node_id]):
+            return 0
+
+        # 找到要删除的key
+        to_delete = []
+        for ts_key in self._data[tree_id][node_id][dimension].keys():
+            try:
+                timestamp = datetime.fromisoformat(ts_key)
+                if before_time is None or timestamp < before_time:
+                    to_delete.append(ts_key)
+            except ValueError:
                 continue
-            if end_time and timestamp > end_time:
-                continue
 
-            filtered.append(point)
+        # 执行删除
+        for ts_key in to_delete:
+            del self._data[tree_id][node_id][dimension][ts_key]
+            deleted_count += 1
 
-        return filtered
+        return deleted_count
 
-    def exists_tree(self, tree_id: str) -> bool:
-        """检查树是否存在"""
-        with self._lock:
-            return tree_id in self._trees
+    def delete_tree(self, tree_id: str) -> bool:
+        """删除整棵树"""
+        deleted = False
 
-    def exists_node(self, tree_id: str, node_id: str) -> bool:
-        """检查节点是否存在"""
-        with self._lock:
-            return (tree_id in self._nodes and
-                    node_id in self._nodes[tree_id])
+        # 删除树结构
+        if tree_id in self._trees:
+            del self._trees[tree_id]
+            deleted = True
 
-    def get_tree_stats(self, tree_id: str) -> Dict[str, Any]:
-        """获取树统计信息"""
-        with self._lock:
-            if tree_id not in self._trees:
-                raise TreeNotFoundError(f"树不存在: {tree_id}")
+        # 删除节点数据
+        if tree_id in self._nodes:
+            del self._nodes[tree_id]
+            deleted = True
 
-            stats = {
-                'tree_id': tree_id,
-                'node_count': len(self._nodes.get(tree_id, {})),
-                'dimension_count': 0,
-                'data_point_count': 0
-            }
+        # 删除时间点数据
+        if tree_id in self._data:
+            del self._data[tree_id]
+            deleted = True
 
-            # 统计维度数据点
-            if tree_id in self._node_data:
-                for node_id, dimensions in self._node_data[tree_id].items():
-                    for dimension, points in dimensions.items():
-                        stats['dimension_count'] += 1
-                        stats['data_point_count'] += len(points)
+        return deleted
+    def get_dimensions(
+        self,
+        tree_id: str,
+        node_id: Optional[str] = None
+    ) -> List[str]:
+        """获取所有出现过维度名称"""
+        dimensions = set()
 
-            return stats
+        if tree_id not in self._data:
+            return []
 
-    def get_node_by_ip(self, tree_id: str, ip_address: str) -> Optional[Dict[str, Any]]:
-        """通过IP地址获取节点"""
-        with self._lock:
-            if (tree_id in self._node_by_ip and
-                    ip_address in self._node_by_ip[tree_id]):
-                node_id = self._node_by_ip[tree_id][ip_address]
-                return self.load_node(tree_id, node_id)
-            return None
+        if node_id:
+            # 只查特定节点
+            if node_id in self._data[tree_id]:
+                dimensions.update(self._data[tree_id][node_id].keys())
+        else:
+            # 查整棵树所有节点
+            for node_data in self._data[tree_id].values():
+                dimensions.update(node_data.keys())
 
-    def close(self):
-        """关闭存储连接（内存存储无操作）"""
-        pass
+        return sorted(list(dimensions))
+
+    def get_time_range(
+        self,
+        tree_id: str,
+        node_id: str,
+        dimension: str
+    ) -> Tuple[Optional[datetime], Optional[datetime]]:
+        """获取某个维度数据的时间范围"""
+        points = self.get_time_points(tree_id, node_id, dimension)
+
+        if not points:
+            return None, None
+
+        timestamps = [p[0] for p in points]
+        return min(timestamps), max(timestamps)
+
+    # ========== 工具方法 ==========
 
     def clear(self):
-        """清空所有数据（测试用）"""
-        with self._lock:
-            self._trees.clear()
-            self._nodes.clear()
-            self._node_data.clear()
-            self._tree_by_name.clear()
-            self._node_by_ip.clear()
+        """清空所有数据（用于测试）"""
+        self._data.clear()
+        self._trees.clear()
+        self._nodes.clear()
 
-    def __str__(self):
-        """字符串表示"""
-        tree_count = len(self._trees)
-        node_count = sum(len(nodes) for nodes in self._nodes.values())
+    def get_stats(self) -> Dict:
+        """获取存储统计信息"""
+        tree_count = len(self._data)
+        node_count = sum(len(t) for t in self._data.values())
+        point_count = 0
 
-        return (f"MemoryStore(trees={tree_count}, nodes={node_count}, "
-                f"data_points={self._count_data_points()})")
+        for tree in self._data.values():
+            for node in tree.values():
+                for dim in node.values():
+                    point_count += len(dim)
 
-    def _count_data_points(self) -> int:
-        """计算总数据点数"""
-        count = 0
-        for tree_id in self._node_data:
-            for node_id in self._node_data[tree_id]:
-                for dimension in self._node_data[tree_id][node_id]:
-                    count += len(self._node_data[tree_id][node_id][dimension])
-        return count
+        return {
+            'trees': tree_count,
+            'nodes': node_count,
+            'time_points': point_count,
+            'memory_estimate': f"~{point_count * 200} bytes"
+        }

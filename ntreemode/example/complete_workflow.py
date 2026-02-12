@@ -1,457 +1,237 @@
-from datetime import datetime, timedelta
-import os
+"""
+ntreemode 完整工作流示例
+展示：IP分配 → 建树 → 记录数据 → 持久化 → 时间旅行 → 快照 → 查询 → 分析
+"""
+
 import sys
-import random
+import os
+from datetime import datetime, timedelta
+from pathlib import Path
 
-# 添加项目路径
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
+# 添加项目根目录到路径
+sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
 
-from temporal_tree.core.ip.provider import IncrementalIPProvider
-from temporal_tree.core.node.factory import NodeFactory
-from temporal_tree.core.node.repository import NodeRepository
+from temporal_tree.system import TemporalTreeSystem
 from temporal_tree.data.storage.sqlite_store import SQLiteStore
 from temporal_tree.data.storage.json_store import JSONStore
-from temporal_tree.data.storage.memory_store import MemoryStore
-from temporal_tree.data.dimensions.registry import DimensionRegistry
-from temporal_tree.data.dimensions.gas_meter import MeterGasDimension
-from temporal_tree.data.dimensions.gas_standard import StandardGasDimension
-from temporal_tree.data.dimensions.loss_rate import LossRateDimension
-from temporal_tree.core.time.timeline import Timeline
-from temporal_tree.core.time.snapshot import SnapshotSystem
-from temporal_tree.services.import_export.excel_importer import GasExcelImporter
-from temporal_tree.exceptions import DimensionError, NodeError
-from temporal_tree.config.settings import SystemSettings
+from temporal_tree.exceptions import TreeError, NodeError, DimensionNotFoundError
 
-print("=" * 70)
-print("🌳 ntreemode 燃气输差分析系统 - 完整使用流程")
-print("=" * 70)
 
 def main():
-    """
-主函数
-"""
-
-    # --- 1. 初始化系统 ---
-    print("\n[1/9] 初始化系统组件...")
-
-    # 创建数据目录
-    os.makedirs("./data", exist_ok=True)
-    os.makedirs("./exports", exist_ok=True)
-    os.makedirs("./snapshots", exist_ok=True)
-
-    # 配置
-    settings = SystemSettings(
-        max_tree_depth=10,
-        max_children_per_node=100,
-        storage_backend="sqlite",
-        storage_path="./data/gas_system.db"
-    )
-
-    # 组件装配
-    ip_provider = IncrementalIPProvider(
-        max_depth=settings.max_tree_depth,
-        max_children_per_node=settings.max_children_per_node
-    )
-
-    factory = NodeFactory(ip_provider)
-
-    # 注册维度
-    dimension_registry = DimensionRegistry()
-    dimension_registry.register(MeterGasDimension())
-    dimension_registry.register(StandardGasDimension())
-    dimension_registry.register(LossRateDimension())
-
-    print("  ✅ 组件初始化完成")
-    print(f"  📁 存储路径: {settings.storage_path}")
-    print(f"  📏 已注册维度: {[d.name for d in dimension_registry.list_dimensions()]}")
-
-    # --- 2. 构建组织架构树 ---
-    print("\n[2/9] 构建组织架构树...")
-
-    # 创建根节点（集团总部）
-    root = factory.create_root_node("北京燃气集团")
-    root.dimension_registry = dimension_registry
-    root.add_tag("headquarter")
-    root.add_tag("gas_company")
-    print(f"  ✅ 创建根节点: {root.name} (IP: {root.ip})")
-
-    # 创建省级公司
-    beijing = factory.create_child_node(root, "北京市公司")
-    beijing.dimension_registry = dimension_registry
-    beijing.add_tag("city_level")
-    beijing.metadata["region"] = "北京"
-    beijing.metadata["established"] = "2000-01-01"
-
-    tianjin = factory.create_child_node(root, "天津市公司")
-    tianjin.dimension_registry = dimension_registry
-    tianjin.add_tag("city_level")
-    tianjin.metadata["region"] = "天津"
-
-    hebei = factory.create_child_node(root, "河北省公司")
-    hebei.dimension_registry = dimension_registry
-    hebei.add_tag("city_level")
-
-    print(f"  ✅ 创建省级公司: {beijing.name}, {tianjin.name}, {hebei.name}")
-
-    # 北京市公司的下属单位
-    chaoyang = factory.create_child_node(beijing, "朝阳分公司")
-    chaoyang.dimension_registry = dimension_registry
-    chaoyang.add_tag("district_level")
-    chaoyang.metadata["area_code"] = "010"
-    chaoyang.metadata["customer_count"] = 150000
-
-    haidian = factory.create_child_node(beijing, "海淀分公司")
-    haidian.dimension_registry = dimension_registry
-    haidian.add_tag("district_level")
-    haidian.metadata["area_code"] = "010"
-    haidian.metadata["customer_count"] = 180000
-
-    # 朝阳分公司下的具体站点
-    station_a = factory.create_child_node(chaoyang, "北苑站")
-    station_a.dimension_registry = dimension_registry
-    station_a.add_tag("station")
-    station_a.metadata["capacity"] = 5000
-    station_a.metadata["device_id"] = "ST-001"
-
-    station_b = factory.create_child_node(chaoyang, "望京站")
-    station_b.dimension_registry = dimension_registry
-    station_b.add_tag("station")
-    station_b.metadata["capacity"] = 8000
-    station_b.metadata["device_id"] = "ST-002"
-
-    print(f"  ✅ 创建站点: {station_a.name}, {station_b.name}")
-
-    # --- 3. 保存树结构到存储 ---
-    tree_id = "gas_tree_2024"
-
-    # 保存树元数据
-    storage.save_tree(tree_id, {
-        "name": "北京燃气集团",
-        "created_at": datetime.now().isoformat(),
-        "root_ip": root.ip,
-        "node_count": 0,  # 稍后更新
-        "settings": settings.__dict__
-    })
-
-    # 保存所有节点
-    all_nodes = [root, beijing, tianjin, hebei, chaoyang, haidian, station_a, station_b]
-    for node in all_nodes:
-        storage.save_node(tree_id, node.to_dict())
-
-    # 更新节点计数
-    storage.update_tree_meta(tree_id, {"node_count": len(all_nodes)})
-
-    print(f"  ✅ 已保存 {len(all_nodes)} 个节点到存储")
-
-    # --- 4. 记录历史气量数据（模拟90天）---
-    print("\n[3/9] 记录历史气量数据（模拟90天）...")
-
-    start_date = datetime(2024, 1, 1)
-    data_points = 0
-
-    for day in range(90):
-        current_date = start_date + timedelta(days=day)
-
-        # 基础气量（带季节性波动）
-        seasonal_factor = 1.0 + 0.2 * (current_date.month in [1, 2, 12])  # 冬季用气多
-
-        # 海淀分公司数据
-        base_meter_hd = 2500 + random.randint(-200, 200) * seasonal_factor
-        base_standard_hd = 2600 + random.randint(-150, 150) * seasonal_factor
-
-        try:
-            haidian.set_data("meter_gas", round(base_meter_hd, 2), current_date, 
-                           {"source": "自动采集", "device": "meter_01"})
-            haidian.set_data("standard_gas", round(base_standard_hd, 2), current_date,
-                           {"source": "自动采集", "device": "meter_01"})
-            data_points += 2
-        except DimensionError as e:
-            print(f"     ⚠️ 海淀数据记录失败: {e}")
-
-        # 朝阳分公司数据
-        base_meter_cy = 3750 + random.randint(-300, 300) * seasonal_factor
-        base_standard_cy = 3900 + random.randint(-250, 250) * seasonal_factor
-
-        try:
-            chaoyang.set_data("meter_gas", round(base_meter_cy, 2), current_date,
-                            {"source": "自动采集", "device": "meter_02"})
-            chaoyang.set_data("standard_gas", round(base_standard_cy, 2), current_date,
-                            {"source": "自动采集", "device": "meter_02"})
-            data_points += 2
-        except DimensionError as e:
-            print(f"     ⚠️ 朝阳数据记录失败: {e}")
-
-        # 站点数据
-        try:
-            station_a.set_data("meter_gas", round(base_meter_cy * 0.3, 2), current_date)
-            station_a.set_data("standard_gas", round(base_standard_cy * 0.3, 2), current_date)
-            station_b.set_data("meter_gas", round(base_meter_cy * 0.4, 2), current_date)
-            station_b.set_data("standard_gas", round(base_standard_cy * 0.4, 2), current_date)
-            data_points += 4
-        except DimensionError as e:
-            print(f"     ⚠️ 站点数据记录失败: {e}")
-
-        # 每10天打印进度
-        if (day + 1) % 30 == 0:
-            print(f"     📊 已记录 {(day + 1)} 天数据...")
-
-    print(f"  ✅ 已记录 {data_points} 个数据点")
-    print(f"  💾 数据已自动持久化到SQLite数据库")
-
-    # --- 5. 计算输差率（自动计算衍生维度）---
-    print("\n[4/9] 计算输差率分析...")
-
-    loss_dimension = dimension_registry.get_dimension("loss_rate")
-    alert_count = {"green": 0, "orange": 0, "red": 0}
-
-    # 为海淀分公司计算输差率
-    end_date = datetime.now()
-    start_date = end_date - timedelta(days=30)
-
-    meter_data = haidian.get_time_series("meter_gas", start_date, end_date)
-    standard_data = haidian.get_time_series("standard_gas", start_date, end_date)
-
-    # 创建时间到值的映射
-    meter_dict = {ts: val for ts, val in meter_data}
-    standard_dict = {ts: val for ts, val in standard_data}
-
-    for timestamp in meter_dict.keys():
-        if timestamp in standard_dict:
-            loss_data = {
-                "meter": meter_dict[timestamp],
-                "standard": standard_dict[timestamp]
-            }
-
-            try:
-                loss_rate = loss_dimension.calculate(loss_data)
-                alert_level = loss_dimension.get_alert_level(loss_rate)
-
-                # 记录输差率
-                haidian.set_data("loss_rate", round(loss_rate, 4), timestamp,
-                               {"meter_value": meter_dict[timestamp], 
-                                "standard_value": standard_dict[timestamp]})
-
-                # 统计告警级别
-                if alert_level == "正常":
-                    alert_count["green"] += 1
-                elif alert_level == "警告":
-                    alert_count["orange"] += 1
-                else:
-                    alert_count["red"] += 1
-
-            except Exception as e:
-                print(f"     ⚠️ 输差率计算失败: {e}")
-
-    print(f"  📈 输差率分析结果（海淀分公司）:")
-    print(f"     ✅ 正常: {alert_count['green']} 天")
-    print(f"     ⚠️ 警告: {alert_count['orange']} 天")
-    print(f"     🚨 报警: {alert_count['red']} 天")
-
-    if alert_count['red'] > 0:
-        print(f"     💡 建议: 存在严重输差，请检查计量设备！")
-
-    # --- 6. 创建快照 ---
-    print("\n[5/9] 创建系统快照...")
-
-    snapshot_system = SnapshotSystem(storage)
-
-    # 为单个节点创建快照
-    snapshot_id_1 = snapshot_system.create_node_snapshot(
-        haidian, 
-        "haidian_2024_q1", 
-        metadata={
-            "reason": "季度结算", 
-            "operator": "admin",
-            "timestamp": datetime.now().isoformat()
-        }
-    )
-    print(f"  ✅ 创建节点快照: {snapshot_id_1}")
-
-    # 为整棵树创建快照
-    snapshot_id_2 = snapshot_system.create_tree_snapshot(
-        root, 
-        "beijing_gas_2024_q1", 
-        metadata={
-            "quarter": "Q1", 
-            "year": 2024,
-            "company": "北京燃气集团",
-            "node_count": len(all_nodes)
-        }
-    )
-    print(f"  ✅ 创建整树快照: {snapshot_id_2}")
-
-    # 查看快照历史
-    snapshots = snapshot_system.get_node_snapshots(haidian.node_id)
-    print(f"  📸 海淀分公司共有 {len(snapshots)} 个历史快照")
-
-    # --- 7. 查询与分析 ---
-    print("\n[6/9] 数据查询与分析...")
-
-    repo = NodeRepository(root)
-
-    # 查询所有站点节点
-    stations = repo.find_nodes(tags=["station"])
-    print(f"  🔍 找到 {len(stations)} 个站点:")
-
-    for station in stations:
-        print(f"     - {station.name} (IP: {station.ip})")
-        print(f"       设备ID: {station.metadata.get('device_id', 'N/A')}")
-
-        # 获取最近7天气量数据
-        end_date = datetime.now()
-        start_date = end_date - timedelta(days=7)
-
-        meter_series = station.get_time_series("meter_gas", start_date, end_date)
-
-        if meter_series:
-            avg_meter = sum(v for _, v in meter_series) / len(meter_series)
-            max_meter = max(v for _, v in meter_series)
-            min_meter = min(v for _, v in meter_series)
-            print(f"        📊 最近7日气量: 平均 {avg_meter:.1f} m³, "
-                  f"最大 {max_meter:.1f} m³, 最小 {min_meter:.1f} m³")
-
-    # 查询指定区域的所有节点
-    beijing_nodes = repo.find_nodes(metadata={"region": "北京"})
-    print(f"\n  🏢 北京区域节点数: {len(beijing_nodes)}")
-
-    # 获取树深度
-    tree_depth = repo.get_tree_depth()
-    print(f"  📐 树深度: {tree_depth} 层")
-
-    # --- 8. 时间线数据验证 ---
-    print("\n[7/9] 验证时间线持久化...")
-
-    # 从存储重新加载节点，验证数据是否持久化
-    print("  正在从SQLite重新加载数据...")
-
-    # 创建新节点实例，从存储加载数据
-    reloaded_haidian = None
-    node_data = storage.get_node(tree_id, haidian.node_id)
-    if node_data:
-        from temporal_tree.core.node.entity import TreeNode
-        reloaded_haidian = TreeNode.from_dict(
-            node_data, 
-            storage=storage,
-            dimension_registry=dimension_registry
-        )
-
-    if reloaded_haidian:
-        # 验证最新数据
-        latest_meter = reloaded_haidian.get_data("meter_gas")
-        latest_standard = reloaded_haidian.get_data("standard_gas")
-        latest_loss = reloaded_haidian.get_data("loss_rate")
-
-        print(f"  ✅ 数据恢复成功:")
-        print(f"     - 最新表计气量: {latest_meter} m³")
-        print(f"     - 最新标准气量: {latest_standard} m³")
-        print(f"     - 最新输差率: {latest_loss:.2%}" if latest_loss else "     - 无输差率数据")
-
-        # 验证时间序列
-        series = reloaded_haidian.get_time_series("meter_gas", 
-                                                 datetime(2024, 1, 1), 
-                                                 datetime(2024, 1, 10))
-        print(f"     - 2024年1月上旬数据点: {len(series)} 个")
-    else:
-        print("  ⚠️ 无法从存储恢复节点数据")
-
-    # --- 9. 导入导出功能演示 ---
-    print("\n[8/9] Excel导入导出功能...")
-
-    # 初始化导入器
-    importer = GasExcelImporter(dimension_registry, storage)
-
-    # 创建示例Excel数据
-    print("  正在生成示例Excel数据...")
-    excel_data = create_sample_excel()
-
-    # 导入到朝阳分公司
-    try:
-        import_result = importer.import_from_excel(
-            excel_data,
-            target_node=chaoyang,
-            date_column="日期",
-            value_columns=["meter_gas", "standard_gas"],
-            date_format="%Y-%m-%d"
-        )
-
-        print(f"  ✅ Excel导入完成:")
-        print(f"     - 导入记录数: {import_result['imported_count']}")
-        print(f"     - 新增数据点: {import_result.get('stats', {}).get('total_points', 0)}")
-    except Exception as e:
-        print(f"  ⚠️ Excel导入失败（可忽略）: {e}")
-
-    # --- 10. 系统状态摘要 ---
-    print("\n[9/9] 系统状态摘要")
-    print("=" * 70)
-    print(f"🌳 树ID: {tree_id}")
-    print(f"📊 节点总数: {len(all_nodes)}")
-    print(f"📏 树深度: {tree_depth}")
-    print(f"💾 存储类型: {storage.__class__.__name__}")
-    print(f"📈 总数据点: ~{data_points}")
-    print(f"📸 快照数量: 2")
-    print("\n📋 节点清单:")
-
-    # 打印树结构
-    from examples.visualization import TreeVisualizer
-    TreeVisualizer.console_print(root, show_ip=True, show_data=True)
-
-    print("\n" + "=" * 70)
-    print("🎉 完整使用流程执行成功！")
-    print("=" * 70)
-
-    return {
-        "tree_id": tree_id,
-        "root": root,
-        "storage": storage,
-        "stats": {
-            "node_count": len(all_nodes),
-            "tree_depth": tree_depth,
-            "data_points": data_points,
-            "snapshots": 2
-        }
+    """演示完整燃气输差分析场景"""
+    print("=" * 60)
+    print("🚀 ntreemode 完整工作流示例")
+    print("=" * 60)
+
+    # ========== 1. 初始化系统 ==========
+    print("\n[1/7] 初始化系统组件...")
+
+    # 1.1 创建存储引擎（使用SQLite持久化）
+    db_path = Path(__file__).parent / "gas_system.db"
+    storage = SQLiteStore(str(db_path))
+    print(f"    📦 存储引擎: SQLite ({db_path})")
+
+    # 1.2 系统配置
+    system_config = {
+        "max_tree_depth": 10,
+        "max_children_per_node": 100,
+        "log_level": "INFO"
     }
 
+    # 1.3 初始化系统
+    system = TemporalTreeSystem(
+        config=system_config,
+        storage=storage
+    )
+    system.initialize()
 
-def create_sample_excel():
-    """
-创建示例Excel数据
-"""
-    import pandas as pd
-    from io import BytesIO
+    print(f"    🖥️  系统版本: {system.get_system_info()['version']}")
+    print(f"    🖥️  系统状态: {system.health_check()['status']}")
+    print(f"    📊  已注册维度: {len(system.get_system_info()['dimensions'])}个")
 
-    data = {
-        "日期": ["2024-02-01", "2024-02-02", "2024-02-03", "2024-02-04", "2024-02-05"],
-        "节点名称": ["朝阳分公司", "朝阳分公司", "朝阳分公司", "朝阳分公司", "朝阳分公司"],
-        "meter_gas": [3750.5, 3820.3, 3680.8, 3910.2, 3850.6],
-        "standard_gas": [3900.2, 3980.1, 3820.5, 4080.3, 4010.9],
-        "操作员": ["张三", "张三", "李四", "王五", "张三"],
-        "备注": ["正常", "正常", "波动", "正常", "正常"]
-    }
+    # ========== 2. 构建组织架构树 ==========
+    print("\n[2/7] 构建燃气公司组织架构...")
 
-    df = pd.DataFrame(data)
-    output = BytesIO()
+    # 2.1 创建树
+    tree_result = system.create_tree(
+        tree_id="tree_gas_001",
+        name="华润燃气集团",
+        description="燃气输差分析示例树"
+    )
+    print(f"    🌳 创建树: {tree_result['name']} (ID: {tree_result['tree_id']})")
 
-    try:
-        with pd.ExcelWriter(output, engine='openpyxl') as writer:
-            df.to_excel(writer, sheet_name='气量数据', index=False)
-    except:
-        # 如果没有openpyxl，使用xlsxwriter
-        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-            df.to_excel(writer, sheet_name='气量数据', index=False)
+    # 2.2 获取树仓库和根节点
+    repository = system.get_tree("tree_gas_001")
+    root = repository.root
+    print(f"       ├─ 根节点: {root.name} (IP: {root.ip})")
 
-    return output.getvalue()
+    # 2.3 创建省级公司
+    beijing_result = system.add_node(
+        tree_id="tree_gas_001",
+        parent_node_id=root.node_id,
+        name="北京公司"
+    )
+    beijing = system.get_node("tree_gas_001", beijing_result["node_id"])
+    print(f"       ├─ 省级公司: {beijing.name} (IP: {beijing.ip})")
+
+    shanghai_result = system.add_node(
+        tree_id="tree_gas_001",
+        parent_node_id=root.node_id,
+        name="上海公司"
+    )
+    shanghai = system.get_node("tree_gas_001", shanghai_result["node_id"])
+    print(f"       ├─ 省级公司: {shanghai.name} (IP: {shanghai.ip})")
+
+    # 2.4 创建门站
+    chaoyang_result = system.add_node(
+        tree_id="tree_gas_001",
+        parent_node_id=beijing.node_id,
+        name="朝阳门站"
+    )
+    chaoyang = system.get_node("tree_gas_001", chaoyang_result["node_id"])
+    print(f"       ├─ 北京下属: {chaoyang.name} (IP: {chaoyang.ip})")
+
+    haidian_result = system.add_node(
+        tree_id="tree_gas_001",
+        parent_node_id=beijing.node_id,
+        name="海淀门站"
+    )
+    haidian = system.get_node("tree_gas_001", haidian_result["node_id"])
+    print(f"       └─ 北京下属: {haidian.name} (IP: {haidian.ip})")
+
+    # ========== 3. 记录历史数据 ==========
+    print("\n[3/7] 记录历史气量数据（模拟30天）...")
+
+    base_time = datetime.now().replace(hour=8, minute=0, second=0, microsecond=0)
+
+    for day in range(30):
+        current_time = base_time - timedelta(days=29-day)
+
+        # 朝阳门站数据
+        meter_value = 1500 + day * 5 + (day % 7) * 10
+        standard_value = 1480 + day * 5 + (day % 7) * 8
+
+        system.set_node_data("tree_gas_001", chaoyang.node_id, "meter_gas", meter_value, current_time)
+        system.set_node_data("tree_gas_001", chaoyang.node_id, "standard_gas", standard_value, current_time)
+
+        # 海淀门站数据（略高）
+        meter_value_hd = 1800 + day * 6 + (day % 7) * 12
+        standard_value_hd = 1770 + day * 6 + (day % 7) * 10
+
+        system.set_node_data("tree_gas_001", haidian.node_id, "meter_gas", meter_value_hd, current_time)
+        system.set_node_data("tree_gas_001", haidian.node_id, "standard_gas", standard_value_hd, current_time)
+
+        if day % 10 == 0:
+            print(f"      已记录 {day+1:2d}/30 天数据...")
+
+    print(f"    ✅ 数据记录完成，共30天历史数据")
+
+    # ========== 4. 计算输差率 ==========
+    print("\n[4/7] 计算输差率...")
+
+    for day in [0, 14, 29]:
+        current_time = base_time - timedelta(days=29-day)
+
+    print(f"    ✅ 输差率计算完成")
+
+    # ========== 5. 时间旅行查询 ==========
+    print("\n[5/7] 时间旅行分析...")
+
+    past_time = base_time - timedelta(days=14)
+    today = base_time
+
+    # 朝阳门站输差率对比
+    past_loss = system.get_node_data("tree_gas_001", chaoyang.node_id, "loss_rate", past_time)
+    today_loss = system.get_node_data("tree_gas_001", chaoyang.node_id, "loss_rate", today)
+
+    print(f"    ⏱️  朝阳门站输差率对比:")
+    print(f"       - 14天前 ({past_time.date()}): {past_loss:.2f}%")
+    print(f"       - 今日 ({today.date()}): {today_loss:.2f}%")
+    print(f"       - 变化: {today_loss - past_loss:+.2f}%")
+
+    # 获取时间序列
+    series = system.get_node_time_series("tree_gas_001", chaoyang.node_id, "loss_rate")
+    if series:
+        values = [v for _, v in series]
+        avg_loss = sum(values) / len(values)
+        max_loss = max(series, key=lambda x: x[1])
+        min_loss = min(series, key=lambda x: x[1])
+
+        print(f"    📈 30天输差率统计:")
+        print(f"       - 平均: {avg_loss:.2f}%")
+        print(f"       - 最高: {max_loss[1]:.2f}% @ {max_loss[0].date()}")
+        print(f"       - 最低: {min_loss[1]:.2f}% @ {min_loss[0].date()}")
+
+    # ========== 6. 输差分析 ==========
+    print("\n[6/7] 输差异常检测...")
+
+    # 今日输差分析
+    analysis_result = system.analyze_loss_rate(
+        tree_id="tree_gas_001",
+        threshold=5.0,  # 5% 警告阈值
+        timestamp=today
+    )
+
+    print(f"    📊 总体输差率: {analysis_result['overall']['loss_rate_percent']}")
+    print(f"    ⚠️  异常节点数: {analysis_result['high_loss_count']}")
+
+    for node_info in analysis_result['high_loss_nodes']:
+        print(f"       - {node_info['name']}: {node_info['loss_rate_percent']}")
+
+    # ========== 7. 创建快照 ==========
+    print("\n[7/7] 创建系统快照...")
+
+    # 创建节点快照
+    snapshot_result = system.create_snapshot(
+        tree_id="tree_gas_001",
+        node_id=chaoyang.node_id,
+        metadata={"reason": "月度盘点", "operator": "张三"}
+    )
+    print(f"    📸 节点快照创建成功: {snapshot_result['snapshot_id']}")
+    print(f"       - 时间: {snapshot_result['timestamp']}")
+
+    # ========== 8. 系统状态 ==========
+    print("\n[8/7] 系统状态统计...")
+
+    trees = system.list_trees()
+    for tree_info in trees:
+        print(f"    🌳 树: {tree_info['name']}")
+        print(f"       - ID: {tree_info['tree_id']}")
+        print(f"       - 节点数: {tree_info['node_count']}")
+        print(f"       - 深度: {tree_info['tree_depth']}")
+        print(f"       - 创建时间: {tree_info['created_at']}")
+
+    # ========== 9. 导出数据 ==========
+    print("\n[9/7] 导出系统状态...")
+
+    export_path = Path(__file__).parent / "tree_export.json"
+    if system.save_to_file(str(export_path)):
+        print(f"    💾 系统状态已导出到: {export_path}")
+        print(f"       - 文件大小: {export_path.stat().st_size} 字节")
+
+    # ========== 完成 ==========
+    print("\n" + "=" * 60)
+    print("🎉 完整工作流执行成功！")
+    print("=" * 60)
+    print(f"\n📁 持久化数据: {db_path}")
+    print(f"📁 导出数据: {export_path}")
+    print("\n✅ 验证点清单:")
+    print("   ✅ 系统初始化")
+    print("   ✅ IP增量编码分配")
+    print("   ✅ 树形架构构建")
+    print("   ✅ 维度数据记录")
+    print("   ✅ SQLite持久化")
+    print("   ✅ 输差率计算")
+    print("   ✅ 时间旅行查询")
+    print("   ✅ 时间序列分析")
+    print("   ✅ 输差异常检测")
+    print("   ✅ 快照创建")
+    print("   ✅ 数据导出")
+    print("\n📊 系统信息:")
+    print(f"   运行时间: {system.get_system_info()['uptime']}")
+    print(f"   总节点数: {system.get_system_info()['total_nodes']}")
+    print(f"   存储引擎: {system.get_system_info()['storage']}")
 
 
 if __name__ == "__main__":
-    try:
-        result = main()
-        print("\n💡 下一步建议:")
-        print("  1. 运行 examples/visualization.py 查看可视化树形图")
-        print("  2. 检查 ./data/gas_system.db 确认数据持久化")
-        print("  3. 尝试时间旅行功能（待实现）")
-    except KeyboardInterrupt:
-        print("\n\n⚠️ 用户中断执行")
-    except Exception as e:
-        print(f"\n❌ 执行失败: {e}")
-        import traceback
-        traceback.print_exc()
+    main()

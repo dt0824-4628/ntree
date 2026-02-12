@@ -1,395 +1,484 @@
 """
-节点实体实现
+树节点实体模块
+定义树节点，每个节点代表组织架构中的一个实体
 """
-from typing import Dict, List, Optional, Any
-from datetime import datetime
-from uuid import uuid4
-import json
 
-from ...interfaces import INode
-from ...exceptions import NodeError, ValidationError
-from ..ip import IPAddress
+from typing import Optional, Dict, Any, List, Set, Union
+from datetime import datetime, timedelta  # 加上 timedelta
+
+from ..ip.address import IPAddress
+from ...data.dimensions.registry import DimensionRegistry
+from ...data.storage.adapter import DataStoreAdapter
+from ..time.timeline import Timeline
+from ...exceptions import NodeError, DimensionNotFoundError
 
 
-class TreeNode(INode):
+class TreeNode:
     """
-    树节点实体
-    实现INode接口，表示燃气输差分析树中的一个节点
+    树节点 - 代表组织架构中的一个实体
+
+    每个节点包含：
+    1. 身份信息：node_id, name, ip, level
+    2. 树关系：parent, children
+    3. 维度数据：每个维度一个Timeline，支持时间旅行
+    4. 标签系统：用于快速分类和查询
     """
 
-    def __init__(self,
-                 name: str,
-                 ip_address: str,
-                 level: int = 0,
-                 node_id: Optional[str] = None,
-                 parent: Optional['TreeNode'] = None,
-                 metadata: Optional[Dict[str, Any]] = None):
+    def __init__(
+        self,
+        node_id: str,
+        name: str,
+        ip: IPAddress,
+        level: int = 0,
+        storage: Optional[DataStoreAdapter] = None,
+        tree_id: Optional[str] = None,
+        max_cache_size: int = 1000
+    ):
         """
-        初始化节点
+        初始化树节点
 
         Args:
+            node_id: 节点唯一标识
             name: 节点名称
-            ip_address: 节点IP地址（增量编码）
-            level: 节点层级（0为根节点）
-            node_id: 节点唯一标识，为None时自动生成
-            parent: 父节点
-            metadata: 节点元数据
+            ip: IP地址（增量编码）
+            level: 层级深度
+            storage: 存储适配器（用于持久化）
+            tree_id: 所属树ID
+            max_cache_size: 每个维度的最大缓存点数
         """
-        self._id = node_id or f"node_{uuid4().hex[:8]}"
-        self._name = name
-        self._level = level
-        self._parent = parent
+        # ========== 身份信息 ==========
+        self.node_id = node_id
+        self.name = name
+        self.ip = ip
+        self.level = level
 
-        # 验证并创建IP地址对象
-        try:
-            self._ip_address_obj = IPAddress(ip_address)
-        except Exception as e:
-            raise ValidationError(
-                message=f"无效的IP地址: {ip_address}",
-                field="ip_address",
-                value=ip_address,
-                reason=str(e)
-            )
+        # ========== 存储配置 ==========
+        self._storage = storage
+        self._tree_id = tree_id
+        self._max_cache_size = max_cache_size
 
-        # 子节点管理
-        self._children: List['TreeNode'] = []
+        # ========== 树结构关系 ==========
+        self.parent: Optional['TreeNode'] = None
+        self.children: List['TreeNode'] = []
 
-        # 维度数据存储：{维度名: {时间戳: 值}}
-        self._data_store: Dict[str, Dict[datetime, Any]] = {}
+        # ========== 标签系统 ==========
+        self._tags: Set[str] = set()
 
-        # 节点元数据
-        self._metadata = metadata or {}
-        self._metadata.update({
-            "created_at": datetime.now(),
-            "updated_at": datetime.now()
-        })
+        # ========== 维度数据（✅ 改造点） ==========
+        # 每个维度一个Timeline，支持时间旅行和自动持久化
+        self._timelines: Dict[str, Timeline] = {}
 
-        # 节点标签
-        self._tags: List[str] = []
+        # ========== 生命周期管理 ==========
+        self.created_at: datetime = datetime.now()
+        self.deleted_at: Optional[datetime] = None
+        self.is_active: bool = True
 
-        # 维度计算器：{维度名: 计算函数}
-        self._calculators: Dict[str, callable] = {}
+    # ========== 维度数据管理 ==========
 
-    @property
-    def node_id(self) -> str:
-        return self._id
-
-    @property
-    def name(self) -> str:
-        return self._name
-
-    @name.setter
-    def name(self, value: str):
-        """设置节点名称"""
-        if not value or not isinstance(value, str):
-            raise ValidationError(
-                message="节点名称不能为空",
-                field="name",
-                value=value,
-                reason="invalid_name"
-            )
-        self._name = value
-        self._metadata["updated_at"] = datetime.now()
-
-    @property
-    def level(self) -> int:
-        return self._level
-
-    @property
-    def ip_address(self) -> str:
-        return str(self._ip_address_obj)
-
-    @property
-    def parent(self) -> Optional['TreeNode']:
-        return self._parent
-
-    @parent.setter
-    def parent(self, node: Optional['TreeNode']) -> None:
-        """设置父节点"""
-        if node is self:
-            raise NodeError("节点不能作为自己的父节点")
-
-        # 断开原来的父子关系
-        if self._parent and self in self._parent._children:
-            self._parent._children.remove(self)
-
-        # 建立新的父子关系
-        self._parent = node
-        if node and self not in node._children:
-            node._children.append(self)
-
-        # 更新层级
-        if node:
-            self._level = node.level + 1
-        else:
-            self._level = 0
-
-        self._metadata["updated_at"] = datetime.now()
-
-    @property
-    def children(self) -> List['TreeNode']:
-        return self._children.copy()
-
-    def add_child(self, child: 'TreeNode') -> 'TreeNode':
-        """添加子节点"""
-        if child in self._children:
-            raise NodeError(f"子节点已存在: {child.name}")
-
-        # 设置子节点的父节点
-        child.parent = self
-
-        # 确保子节点被添加到列表
-        if child not in self._children:
-            self._children.append(child)
-
-        self._metadata["updated_at"] = datetime.now()
-        return child
-
-    def remove_child(self, child_id: str) -> bool:
-        """移除子节点"""
-        for i, child in enumerate(self._children):
-            if child.node_id == child_id:
-                # 断开父子关系
-                child._parent = None
-                child._level = 0
-
-                # 从列表中移除
-                self._children.pop(i)
-
-                self._metadata["updated_at"] = datetime.now()
-                return True
-
-        return False
-
-    def get_child_by_ip(self, ip_address: str) -> Optional['TreeNode']:
-        """根据IP地址获取子节点"""
-        for child in self._children:
-            if child.ip_address == ip_address:
-                return child
-        return None
-
-    def get_child_by_name(self, name: str) -> Optional['TreeNode']:
-        """根据名称获取子节点"""
-        for child in self._children:
-            if child.name == name:
-                return child
-        return None
-
-    def get_data(self, dimension: str, timestamp: Optional[datetime] = None) -> Any:
+    def _get_or_create_timeline(self, dimension: str) -> Timeline:
         """
-        获取指定维度的数据
+        获取或创建指定维度的Timeline
 
         Args:
             dimension: 维度名称
-            timestamp: 时间戳，None表示最新数据
 
         Returns:
-            维度数据，如果不存在返回None
+            Timeline对象
         """
-        # 首先检查是否有计算器
-        if dimension in self._calculators:
-            return self._calculators[dimension](self, timestamp)
+        if dimension not in self._timelines:
+            self._timelines[dimension] = Timeline(
+                object_id=self.node_id,
+                dimension=dimension,
+                storage=self._storage,
+                tree_id=self._tree_id,
+                max_cache_size=self._max_cache_size
+            )
+        return self._timelines[dimension]
 
-        # 检查数据存储
-        if dimension not in self._data_store:
-            return None
-
-        dimension_data = self._data_store[dimension]
-
-        if not dimension_data:
-            return None
-
-        if timestamp is None:
-            # 返回最新数据
-            latest_time = max(dimension_data.keys())
-            return dimension_data[latest_time]
-        else:
-            # 返回指定时间数据
-            # 如果没有精确匹配，返回最接近的时间点数据
-            if timestamp in dimension_data:
-                return dimension_data[timestamp]
-
-            # 寻找最接近的时间点
-            closest_time = None
-            min_diff = None
-
-            for data_time in dimension_data.keys():
-                diff = abs((data_time - timestamp).total_seconds())
-                if min_diff is None or diff < min_diff:
-                    min_diff = diff
-                    closest_time = data_time
-
-            if closest_time and min_diff < 3600:  # 1小时内的容忍度
-                return dimension_data[closest_time]
-
-            return None
-
-    def set_data(self, dimension: str, value: Any,
-                 timestamp: Optional[datetime] = None) -> None:
+    def set_data(
+        self,
+        dimension: str,
+        value: Any,
+        timestamp: Optional[datetime] = None,
+        quality: int = 1,
+        unit: Optional[str] = None,
+        auto_persist: bool = True
+    ) -> None:
         """
         设置维度数据
 
         Args:
-            dimension: 维度名称
-            value: 数据值
-            timestamp: 时间戳，None表示当前时间
+            dimension: 维度名称（如 'meter_gas', 'pressure'）
+            value: 数值
+            timestamp: 时间戳，默认当前时间
+            quality: 质量码（0=无效,1=正常,2=估算）
+            unit: 单位（覆盖维度默认单位）
+            auto_persist: 是否自动持久化
+
+        Raises:
+            NodeError: 节点已删除时设置数据
+            ValueError: 数据验证失败
         """
+        # 1. 检查节点状态
+        if not self.is_active:
+            raise NodeError(f"节点已删除，无法设置数据: {self.node_id}")
+
+        # 2. 数据验证
+        try:
+            dim = DimensionRegistry().get_dimension(dimension)
+            validated_value = dim.validate(value)
+            actual_unit = unit or dim.unit
+        except (KeyError, DimensionNotFoundError):  # ✅ 同时捕获两种异常
+            # 维度不存在时，只做基本类型检查
+            validated_value = value
+            actual_unit = unit
+        except Exception as e:
+            raise ValueError(f"数据验证失败 [{dimension}]: {e}")
+        # 3. 获取或创建Timeline
+        tl = self._get_or_create_timeline(dimension)
+
+        # 4. 记录时间点
+        ts = timestamp or datetime.now()
+        tl.add_time_point(
+            timestamp=ts,
+            value=validated_value,
+            quality=quality,
+            unit=actual_unit,
+            auto_persist=auto_persist
+        )
+
+    def get_data(self, dimension: str, timestamp: Optional[datetime] = None, tolerance: Optional[int] = None) -> \
+            Optional[Any]:
+        # ========== 1. 处理计算型维度 ==========
+        try:
+            dim = DimensionRegistry().get_dimension(dimension)
+            if dim.is_calculated:
+                # 输差率计算
+                if dimension == "loss_rate":
+                    # 获取计算所需的基础数据
+                    standard = self.get_data("standard_gas", timestamp, tolerance)
+                    meter = self.get_data("meter_gas", timestamp, tolerance)
+
+                    # 只有两个数据都存在时才计算
+                    if standard is not None and meter is not None:
+                        return dim.calculate(standard, meter)
+                    return None
+                # 未来可以添加其他计算型维度
+                return None
+        except:
+            # 维度不存在或不是计算型，继续走存储型逻辑
+            pass
+        if dimension not in self._timelines:
+            return None
+
+        tl = self._timelines[dimension]
+
         if timestamp is None:
-            timestamp = datetime.now()
+            point = tl.get_latest()
+            print(f"🔍 DEBUG: get_latest() returned {type(point)}")  # 强制输出
+            if point:
+                print(f"🔍 DEBUG: point.value = {point.value}")
+                return point.value
+            return None
 
-        if dimension not in self._data_store:
-            self._data_store[dimension] = {}
+        point = tl.get_time_point(timestamp)
+        if point:
+            print(f"🔍 DEBUG: get_time_point() returned value={point.value}")
+            return point.value
 
-        self._data_store[dimension][timestamp] = value
-        self._metadata["updated_at"] = datetime.now()
+        # 容差查询
+        if tolerance:
+            start = timestamp - timedelta(seconds=tolerance)
+            end = timestamp + timedelta(seconds=tolerance)
+            points = tl.get_time_range(start_time=start, end_time=end, limit=1)
+            if points:
+                # ✅ 调试代码放在这里！
+                print(f"🔍 TOLERANCE QUERY: points[0].value={points[0].value}, type={type(points[0].value)}")
+                return points[0].value
 
-    def get_all_dimensions(self) -> List[str]:
-        """获取所有可用的维度名称"""
-        dimensions = set(self._data_store.keys())
-        dimensions.update(self._calculators.keys())
-        return sorted(list(dimensions))
+        return None
 
-    def has_dimension(self, dimension: str) -> bool:
-        """检查是否包含指定维度"""
-        return dimension in self._data_store or dimension in self._calculators
-
-    def get_descendants(self) -> List['TreeNode']:
-        """获取所有后代节点（深度优先遍历）"""
-        descendants = []
-
-        def collect(node: 'TreeNode'):
-            for child in node.children:
-                descendants.append(child)
-                collect(child)
-
-        collect(self)
-        return descendants
-
-    def get_ancestors(self) -> List['TreeNode']:
-        """获取所有祖先节点（从父节点到根节点）"""
-        ancestors = []
-        current = self.parent
-
-        while current is not None:
-            ancestors.append(current)
-            current = current.parent
-
-        return ancestors
-
-    def add_dimension_calculator(self, dimension: str, calculator: callable) -> None:
+    def get_time_series(
+        self,
+        dimension: str,
+        start_time: Optional[datetime] = None,
+        end_time: Optional[datetime] = None,
+        limit: Optional[int] = None
+    ) -> List[tuple]:
         """
-        添加维度计算器
+        获取时间序列数据
+
+        Returns:
+            List of (timestamp, value)
+        """
+        if dimension not in self._timelines:
+            return []
+
+        tl = self._timelines[dimension]
+        points = tl.get_time_range(
+            start_time=start_time,
+            end_time=end_time,
+            limit=limit
+        )
+
+        return [(p.timestamp, p.value) for p in points]
+
+    def get_dimensions(self) -> List[str]:
+        """
+        获取节点所有有数据的维度
+
+        Returns:
+            维度名称列表
+        """
+        return list(self._timelines.keys())
+
+    def delete_dimension_data(
+        self,
+        dimension: str,
+        before_time: Optional[datetime] = None
+    ) -> int:
+        """
+        删除维度数据
 
         Args:
             dimension: 维度名称
-            calculator: 计算函数，接收(node, timestamp)参数，返回计算值
+            before_time: 删除此时间之前的数据，None表示删除所有
+
+        Returns:
+            删除的数据点数
         """
-        self._calculators[dimension] = calculator
+        if dimension not in self._timelines:
+            return 0
+
+        tl = self._timelines[dimension]
+        deleted = tl.delete_before(before_time) if before_time else len(tl)
+
+        if before_time is None or deleted == len(tl):
+            # 删除整个维度
+            del self._timelines[dimension]
+
+        return deleted
+
+    # ========== 标签管理 ==========
 
     def add_tag(self, tag: str) -> None:
         """添加标签"""
-        if tag not in self._tags:
-            self._tags.append(tag)
+        self._tags.add(tag)
 
-    def remove_tag(self, tag: str) -> bool:
+    def remove_tag(self, tag: str) -> None:
         """移除标签"""
-        if tag in self._tags:
-            self._tags.remove(tag)
+        self._tags.discard(tag)
+
+    def has_tag(self, tag: str) -> bool:
+        """检查是否有标签"""
+        return tag in self._tags
+
+    def get_tags(self) -> List[str]:
+        """获取所有标签"""
+        return sorted(list(self._tags))
+
+    # ========== 树结构管理 ==========
+
+    def add_child(self, child_node: 'TreeNode') -> None:
+        """添加子节点"""
+        if child_node not in self.children:
+            self.children.append(child_node)
+            child_node.parent = self
+
+    def remove_child(self, child_node: 'TreeNode') -> bool:
+        """移除子节点"""
+        if child_node in self.children:
+            self.children.remove(child_node)
+            child_node.parent = None
             return True
         return False
 
-    def has_tag(self, tag: str) -> bool:
-        """检查是否包含标签"""
-        return tag in self._tags
+    def get_ancestors(self) -> List['TreeNode']:
+        """获取所有祖先节点（从根到父节点）"""
+        ancestors = []
+        current = self.parent
+        while current:
+            ancestors.insert(0, current)
+            current = current.parent
+        return ancestors
 
-    def get_all_data(self, include_calculated: bool = True) -> Dict[str, Dict[datetime, Any]]:
+    def get_descendants(self) -> List['TreeNode']:
+        """获取所有后代节点（递归）"""
+        descendants = []
+        for child in self.children:
+            descendants.append(child)
+            descendants.extend(child.get_descendants())
+        return descendants
+
+    def get_root(self) -> 'TreeNode':
+        """获取根节点"""
+        root = self
+        while root.parent:
+            root = root.parent
+        return root
+
+    def get_path(self) -> List[str]:
+        """获取从根到当前节点的路径名称"""
+        path = [self.name]
+        current = self.parent
+        while current:
+            path.insert(0, current.name)
+            current = current.parent
+        return path
+
+    # ========== 生命周期管理 ==========
+
+    def delete(self, timestamp: Optional[datetime] = None) -> None:
         """
-        获取所有维度数据
+        软删除节点
+        节点标记为已删除，但历史数据保留
+        """
+        self.deleted_at = timestamp or datetime.now()
+        self.is_active = False
+
+    def is_alive_at(self, timestamp: datetime) -> bool:
+        """
+        判断节点在指定时间点是否存活
 
         Args:
-            include_calculated: 是否包含计算维度
+            timestamp: 时间点
 
         Returns:
-            维度数据字典
+            True 表示节点在该时间点存在
         """
-        result = self._data_store.copy()
-
-        if include_calculated:
-            for dimension in self._calculators.keys():
-                if dimension not in result:
-                    result[dimension] = {}
-                # 计算维度没有历史数据，只有当前值
-                result[dimension][datetime.now()] = self.get_data(dimension)
-
-        return result
-
-    def validate(self) -> bool:
-        """验证节点数据是否有效"""
-        # 验证名称
-        if not self._name or not isinstance(self._name, str):
+        if timestamp < self.created_at:
             return False
-
-        # 验证IP地址
-        try:
-            IPAddress(self.ip_address)
-        except:
+        if self.deleted_at and timestamp >= self.deleted_at:
             return False
-
-        # 验证父子关系一致性
-        if self._parent and self not in self._parent.children:
-            return False
-
-        # 验证子节点
-        for child in self._children:
-            if child.parent != self:
-                return False
-
         return True
 
-    def to_dict(self, include_children: bool = False,
-                include_data: bool = False) -> Dict[str, Any]:
+    # ========== 序列化 ==========
+
+    def to_dict(self, include_children: bool = True, include_data: bool = True) -> Dict[str, Any]:
         """
-        转换为字典
+        序列化节点
 
         Args:
-            include_children: 是否包含子节点信息
+            include_children: 是否包含子节点ID列表
             include_data: 是否包含维度数据
 
         Returns:
-            节点字典表示
+            可JSON序列化的字典
         """
         result = {
-            "node_id": self._id,
-            "name": self._name,
-            "ip_address": self.ip_address,
-            "level": self._level,
-            "parent_id": self._parent.node_id if self._parent else None,
-            "children_count": len(self._children),
-            "tags": self._tags.copy(),
-            "metadata": self._metadata.copy(),
-            "dimensions": self.get_all_dimensions()
+            'node_id': self.node_id,
+            'name': self.name,
+            'ip': str(self.ip),
+            'level': self.level,
+            'tags': list(self._tags),
+            'created_at': self.created_at.isoformat(),
+            'deleted_at': self.deleted_at.isoformat() if self.deleted_at else None,
+            'is_active': self.is_active,
+            'parent_id': self.parent.node_id if self.parent else None,  # ✅ 必须保存！
         }
 
         if include_children:
-            result["children"] = [
-                child.to_dict(include_children=False, include_data=include_data)
-                for child in self._children
-            ]
+            result['children'] = [child.node_id for child in self.children]
 
         if include_data:
-            result["data"] = {
-                dimension: {
-                    str(timestamp): value
-                    for timestamp, value in data.items()
-                }
-                for dimension, data in self.get_all_data().items()
+            result['timelines'] = {
+                dim: tl.to_dict()
+                for dim, tl in self._timelines.items()
             }
 
         return result
 
-    def __str__(self) -> str:
-        indent = "  " * self._level
-        return f"{indent}{self._name} (IP: {self.ip_address}, ID: {self._id[:8]})"
+    @classmethod
+    def from_dict(
+        cls,
+        data: Dict[str, Any],
+        storage: Optional[DataStoreAdapter] = None,
+        tree_id: Optional[str] = None,
+        max_cache_size: int = 1000
+    ) -> 'TreeNode':
+        """
+        反序列化创建节点
+
+        Args:
+            data: 序列化的节点数据
+            storage: 存储适配器
+            tree_id: 所属树ID
+            max_cache_size: 缓存大小
+        """
+        node = cls(
+            node_id=data['node_id'],
+            name=data['name'],
+            ip = IPAddress(data['ip']),
+            level=data['level'],
+            storage=storage,
+            tree_id=tree_id,
+            max_cache_size=max_cache_size
+        )
+
+        # 恢复标签
+        node._tags = set(data.get('tags', []))
+
+        # 恢复生命周期
+        node.created_at = datetime.fromisoformat(data['created_at'])
+        if data.get('deleted_at'):
+            node.deleted_at = datetime.fromisoformat(data['deleted_at'])
+        node.is_active = data.get('is_active', True)
+
+        # 恢复Timeline数据
+        for dim, tl_data in data.get('timelines', {}).items():
+            tl = Timeline.from_dict(
+                tl_data,
+                storage=storage,
+                tree_id=tree_id
+            )
+            node._timelines[dim] = tl
+
+        # 注意：children关系需要在树重建时设置
+        return node
+
+    # ========== 统计信息 ==========
+
+    def get_stats(self) -> Dict[str, Any]:
+        """
+        获取节点统计信息
+
+        Returns:
+            {
+                'dimensions': 维度数量,
+                'total_points': 总数据点数,
+                'cache_size': 当前缓存大小,
+                'storage': 是否持久化
+            }
+        """
+        total_points = 0
+        cache_size = 0
+
+        for dim, tl in self._timelines.items():
+            total_points += len(tl)  # 历史总数
+            cache_size += tl.size()   # 当前缓存
+
+        return {
+            'node_id': self.node_id,
+            'name': self.name,
+            'dimensions': len(self._timelines),
+            'total_points': total_points,
+            'cache_size': cache_size,
+            'storage_enabled': self._storage is not None,
+            'is_active': self.is_active,
+            'created_at': self.created_at,
+            'deleted_at': self.deleted_at
+        }
+
+    # ========== 特殊方法 ==========
 
     def __repr__(self) -> str:
-        return f"TreeNode(name='{self._name}', ip='{self.ip_address}', level={self._level})"
+        status = "✓" if self.is_active else "✗"
+        return f"TreeNode({self.name}, ip={self.ip}, dims={len(self._timelines)})[{status}]"
+
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, TreeNode):
+            return False
+        return self.node_id == other.node_id
+
+    def __hash__(self) -> int:
+        return hash(self.node_id)

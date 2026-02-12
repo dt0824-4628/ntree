@@ -1,358 +1,421 @@
 """
-时间线管理
-管理节点或树的时间序列状态
+时间线模块 - 管理某个对象（节点/树）的某个维度的历史数据
+每个Timeline代表一个维度的时间序列
 """
-from typing import Dict, List, Optional, Any
-from datetime import datetime, timedelta
-from dataclasses import dataclass, asdict
-import json
 
-from ...exceptions import TimeError, InvalidTimestampError
+from datetime import datetime
+from typing import Any, Optional, List, Tuple, Dict
+from dataclasses import dataclass, field
+
+from ...exceptions import TimeError
+from ...data.storage.adapter import DataStoreAdapter
 
 
 @dataclass
 class TimePoint:
-    """时间点表示"""
+    """时间点数据"""
     timestamp: datetime
-    data: Dict[str, Any]
-    metadata: Dict[str, Any] = None
+    value: Any
+    metadata: Dict[str, Any] = field(default_factory=dict)
 
-    def __post_init__(self):
-        if self.metadata is None:
-            self.metadata = {}
-        self.metadata.setdefault('created_at', datetime.now())
-
-    def to_dict(self) -> Dict[str, Any]:
-        """转换为字典"""
+    def to_dict(self) -> Dict:
+        """序列化"""
         return {
             'timestamp': self.timestamp.isoformat(),
-            'data': self.data,
+            'value': self.value,
             'metadata': self.metadata
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'TimePoint':
-        """从字典创建"""
-        timestamp = datetime.fromisoformat(data['timestamp'])
+    def from_dict(cls, data: Dict) -> 'TimePoint':
+        """反序列化"""
         return cls(
-            timestamp=timestamp,
-            data=data['data'],
+            timestamp=datetime.fromisoformat(data['timestamp']),
+            value=data['value'],
             metadata=data.get('metadata', {})
         )
 
 
 class Timeline:
     """
-    时间线类
-    管理对象（节点或树）随时间变化的状态
+    时间线 - 管理某个对象（节点/树）的某个维度的历史数据
+
+    职责：
+    1. 内存缓存：最近访问的时间点数据
+    2. 持久化：自动将新数据写入存储
+    3. 查询：支持时间范围查询、最新值查询
+    4. 缓存管理：LRU策略，避免内存溢出
     """
 
-    def __init__(self, object_id: str, object_type: str = "node"):
+    def __init__(
+        self,
+        object_id: str,
+        dimension: str,
+        storage: Optional[DataStoreAdapter] = None,
+        tree_id: Optional[str] = None,
+        max_cache_size: int = 1000
+    ):
         """
         初始化时间线
 
         Args:
             object_id: 对象ID（节点ID或树ID）
-            object_type: 对象类型，'node' 或 'tree'
+            dimension: 维度名称（如 'meter_gas', 'pressure'）
+            storage: 存储适配器，如果提供则自动持久化
+            tree_id: 所属树ID，用于存储查询
+            max_cache_size: 内存缓存最大条目数
         """
         self.object_id = object_id
-        self.object_type = object_type
+        self.dimension = dimension
+        self._storage = storage
+        self._tree_id = tree_id
+        self._max_cache_size = max_cache_size
 
-        # 时间点存储：时间戳 -> TimePoint
+        # 内存缓存：时间戳 -> TimePoint
         self._time_points: Dict[datetime, TimePoint] = {}
 
-        # 元数据
-        self.metadata = {
-            'created_at': datetime.now(),
-            'object_id': object_id,
-            'object_type': object_type,
-            'time_point_count': 0,
-            'time_range': None
-        }
+        # LRU缓存淘汰用：按时间排序的key列表
+        self._cache_order: List[datetime] = []
 
-    def add_time_point(self, timestamp: datetime, data: Dict[str, Any],
-                       metadata: Optional[Dict[str, Any]] = None) -> TimePoint:
-        """
-        添加时间点
+        # 如果提供了存储，预加载最近的数据
+        if storage and tree_id:
+            self._load_recent_points()
 
-        Args:
-            timestamp: 时间戳
-            data: 时间点数据
-            metadata: 元数据
+    def _load_recent_points(self, limit: int = 100):
+        """从存储加载最近的时间点"""
+        if not self._storage or not self._tree_id:
+            return
 
-        Returns:
-            创建的时间点
-
-        Raises:
-            InvalidTimestampError: 时间戳无效
-        """
-        # 验证时间戳
-        if not isinstance(timestamp, datetime):
-            try:
-                timestamp = datetime.fromisoformat(timestamp)
-            except:
-                raise InvalidTimestampError(str(timestamp))
-
-        # 检查时间点是否已存在（允许覆盖）
-        if timestamp in self._time_points:
-            # 更新时间点
-            time_point = self._time_points[timestamp]
-            time_point.data.update(data)
-            if metadata:
-                time_point.metadata.update(metadata)
-        else:
-            # 创建新时间点
-            time_point = TimePoint(
-                timestamp=timestamp,
-                data=data.copy(),
-                metadata=metadata.copy() if metadata else {}
+        try:
+            # 获取最近的点
+            points = self._storage.get_time_points(
+                tree_id=self._tree_id,
+                node_id=self.object_id,
+                dimension=self.dimension,
+                limit=limit
             )
-            self._time_points[timestamp] = time_point
 
-        # 更新时间线元数据
-        self._update_metadata()
+            for ts, value, metadata in points:
+                self._time_points[ts] = TimePoint(ts, value, metadata)
+                self._cache_order.append(ts)  # 按时间顺序添加
 
-        return time_point
+            # 确保不超过缓存大小
+            self._ensure_cache_size()
+        except Exception as e:
+            # 存储出错不影响内存操作
+            raise TimeError(f"加载历史数据失败: {e}")
 
+    def _ensure_cache_size(self):
+        print(f"当前缓存大小: {len(self._time_points)}, 最大: {self._max_cache_size}")
+        print(f"缓存顺序: {[ts.day for ts in self._cache_order]}")
+
+        while len(self._time_points) > self._max_cache_size:
+            oldest = self._cache_order.pop(0)
+            print(f"淘汰: {oldest.day}")
+            if oldest in self._time_points:
+                del self._time_points[oldest]
+
+        print(f"淘汰后大小: {len(self._time_points)}")
+
+    def add_time_point(
+            self,
+            timestamp: datetime,
+            value: Any,
+            metadata: Optional[Dict] = None,
+            quality: int = 1,
+            unit: Optional[str] = None,
+            auto_persist: bool = True
+    ) -> TimePoint:
+        """添加时间点"""
+        # 1. 构建元数据
+        meta = metadata or {}
+        if unit:
+            meta['unit'] = unit
+        meta['quality'] = quality
+        meta['created_at'] = datetime.now().isoformat()
+
+        # 2. 创建时间点
+        point = TimePoint(timestamp, value, meta)
+
+        # 🔍 添加调试
+        print(f"🔍 TIMELINE ADD: timestamp={timestamp}, value={value}, type={type(value)}")
+
+        # 3. 存入内存缓存
+        if timestamp in self._time_points:
+            if timestamp in self._cache_order:
+                self._cache_order.remove(timestamp)
+
+        self._time_points[timestamp] = point
+        self._cache_order.append(timestamp)
+
+        # ✅ 【关键】触发缓存淘汰！
+        self._ensure_cache_size()
+
+        # 4. 自动持久化
+        if auto_persist and self._storage and self._tree_id:
+            try:
+                self._storage.save_time_point(
+                    tree_id=self._tree_id,
+                    node_id=self.object_id,
+                    dimension=self.dimension,
+                    timestamp=timestamp,
+                    value=value,
+                    quality=quality,
+                    unit=unit
+                )
+                # 🔍 添加调试
+                print(f"🔍 STORAGE SAVE: tree_id={self._tree_id}, node={self.object_id}, dim={self.dimension}")
+            except Exception as e:
+                raise TimeError(f"持久化时间点失败: {e}")
+
+        return point
     def get_time_point(self, timestamp: datetime) -> Optional[TimePoint]:
         """
-        获取指定时间点
+        获取指定时间点的数据
 
-        Args:
-            timestamp: 时间戳
-
-        Returns:
-            时间点，如果不存在返回None
+        策略：
+        1. 先查内存缓存
+        2. 没有再查存储
+        3. 查到后加载到缓存
+        4. 更新LRU顺序
         """
-        return self._time_points.get(timestamp)
+        # 1. 查内存
+        if timestamp in self._time_points:
+            # 【修复】更新LRU顺序：把访问的移到末尾
+            if timestamp in self._cache_order:
+                self._cache_order.remove(timestamp)
+            self._cache_order.append(timestamp)
+            return self._time_points[timestamp]
 
-    def get_nearest_time_point(self, timestamp: datetime,
-                               max_delta: Optional[timedelta] = None) -> Optional[TimePoint]:
-        """
-        获取最接近的时间点
+        # 2. 查存储
+        if self._storage and self._tree_id:
+            try:
+                points = self._storage.get_time_points(
+                    tree_id=self._tree_id,
+                    node_id=self.object_id,
+                    dimension=self.dimension,
+                    start_time=timestamp,
+                    end_time=timestamp,
+                    limit=1
+                )
 
-        Args:
-            timestamp: 目标时间戳
-            max_delta: 最大时间差，如果超过则返回None
+                if points:
+                    ts, value, metadata = points[0]
+                    print(f"🔍 STORAGE RAW: value={value}, type={type(value)}")
+                    print(f"🔍 STORAGE RAW: metadata={metadata}")
+                    point = TimePoint(ts, value, metadata)
+                    print(f"🔍 TIMEPOINT CREATED: point.value={point.value}, type={type(point.value)}")
+                    self._time_points[ts] = point
+                    self._cache_order.append(ts)
+                    self._ensure_cache_size()
+                    return point
+            except Exception as e:
+                raise TimeError(f"查询历史数据失败: {e}")
 
-        Returns:
-            最接近的时间点
-        """
-        if not self._time_points:
-            return None
+        return None
 
-        # 寻找最接近的时间点
-        closest_time = None
-        min_delta = None
+    def get_latest(self, before_time: Optional[datetime] = None) -> Optional[TimePoint]:
+        # 1. 先从内存找
+        candidates = []
+        for ts, point in self._time_points.items():
+            if before_time is None or ts < before_time:
+                candidates.append((ts, point))
 
-        for time_key in self._time_points.keys():
-            delta = abs(time_key - timestamp)
+        if candidates:
+            candidates.sort(key=lambda x: x[0], reverse=True)
+            point = candidates[0][1]
+            print(f"DEBUG: get_latest from cache returns {type(point)}")  # 🐛
+            return point
 
-            if min_delta is None or delta < min_delta:
-                min_delta = delta
-                closest_time = time_key
+        # 2. 内存没有，查存储
+        if self._storage and self._tree_id:
+            try:
+                latest = self._storage.get_latest_time_point(
+                    tree_id=self._tree_id,
+                    node_id=self.object_id,
+                    dimension=self.dimension,
+                    before_time=before_time
+                )
 
-        # 检查是否在允许的范围内
-        if max_delta is not None and min_delta > max_delta:
-            return None
+                if latest:
+                    ts, value, metadata = latest
+                    point = TimePoint(ts, value, metadata)
+                    print(f"DEBUG: get_latest from storage returns {type(point)}")  # 🐛
+                    self._time_points[ts] = point
+                    self._cache_order.append(ts)
+                    self._ensure_cache_size()
+                    return point
+            except Exception as e:
+                raise TimeError(f"查询最新数据失败: {e}")
 
-        return self._time_points[closest_time] if closest_time else None
+        return None
 
-    def get_time_range(self, start_time: Optional[datetime] = None,
-                       end_time: Optional[datetime] = None) -> List[TimePoint]:
+    def get_time_range(
+        self,
+        start_time: Optional[datetime] = None,
+        end_time: Optional[datetime] = None,
+        limit: Optional[int] = None
+    ) -> List[TimePoint]:
         """
         获取时间范围内的所有时间点
 
-        Args:
-            start_time: 开始时间
-            end_time: 结束时间
-
-        Returns:
-            时间点列表
+        策略：直接从存储查询，避免缓存不一致
         """
+        if self._storage and self._tree_id:
+            try:
+                points = self._storage.get_time_points(
+                    tree_id=self._tree_id,
+                    node_id=self.object_id,
+                    dimension=self.dimension,
+                    start_time=start_time,
+                    end_time=end_time,
+                    limit=limit
+                )
+
+                result = []
+                for ts, value, metadata in points:
+                    point = TimePoint(ts, value, metadata)
+                    result.append(point)
+                    # 同时更新缓存
+                    if ts not in self._time_points:
+                        self._time_points[ts] = point
+                        self._cache_order.append(ts)
+
+                self._ensure_cache_size()
+                return result
+            except Exception as e:
+                raise TimeError(f"查询时间范围失败: {e}")
+
+        # 无存储时，从内存过滤
         result = []
-
-        for timestamp, time_point in self._time_points.items():
-            # 检查时间范围
-            if start_time and timestamp < start_time:
+        for ts, point in self._time_points.items():
+            if start_time and ts < start_time:
                 continue
-            if end_time and timestamp > end_time:
+            if end_time and ts > end_time:
                 continue
+            result.append(point)
 
-            result.append(time_point)
-
-        # 按时间排序
-        result.sort(key=lambda tp: tp.timestamp)
+        result.sort(key=lambda x: x.timestamp)
+        if limit and limit > 0:
+            result = result[:limit]
 
         return result
 
-    def get_latest(self) -> Optional[TimePoint]:
-        """获取最新时间点"""
-        if not self._time_points:
-            return None
-
-        latest_time = max(self._time_points.keys())
-        return self._time_points[latest_time]
-
-    def get_earliest(self) -> Optional[TimePoint]:
-        """获取最早时间点"""
-        if not self._time_points:
-            return None
-
-        earliest_time = min(self._time_points.keys())
-        return self._time_points[earliest_time]
-
-    def delete_time_point(self, timestamp: datetime) -> bool:
+    def get_time_range_cached(
+        self,
+        start_time: Optional[datetime] = None,
+        end_time: Optional[datetime] = None
+    ) -> List[TimePoint]:
         """
-        删除时间点
+        仅从缓存获取时间范围（用于性能敏感场景）
+        """
+        result = []
+        for ts, point in self._time_points.items():
+            if start_time and ts < start_time:
+                continue
+            if end_time and ts > end_time:
+                continue
+            result.append(point)
 
-        Args:
-            timestamp: 时间戳
+        result.sort(key=lambda x: x.timestamp)
+        return result
+
+    def delete_before(self, before_time: datetime) -> int:
+        """
+        删除指定时间之前的所有点
 
         Returns:
-            是否删除成功
+            删除的数量
         """
-        if timestamp in self._time_points:
-            del self._time_points[timestamp]
-            self._update_metadata()
-            return True
-        return False
+        deleted_count = 0
 
-    def clear(self, before_time: Optional[datetime] = None) -> int:
-        """
-        清空时间点
+        # 1. 删除内存中的
+        to_delete = [ts for ts in self._time_points.keys() if ts < before_time]
+        for ts in to_delete:
+            del self._time_points[ts]
+            if ts in self._cache_order:
+                self._cache_order.remove(ts)
+            deleted_count += 1
 
-        Args:
-            before_time: 如果指定，只删除此时间之前的时间点
+        # 2. 删除存储中的
+        if self._storage and self._tree_id:
+            try:
+                deleted = self._storage.delete_time_points(
+                    tree_id=self._tree_id,
+                    node_id=self.object_id,
+                    dimension=self.dimension,
+                    before_time=before_time
+                )
+                deleted_count = max(deleted_count, deleted)
+            except Exception as e:
+                raise TimeError(f"删除历史数据失败: {e}")
 
-        Returns:
-            删除的时间点数量
-        """
-        if before_time is None:
-            count = len(self._time_points)
-            self._time_points.clear()
-        else:
-            to_delete = [
-                timestamp for timestamp in self._time_points.keys()
-                if timestamp < before_time
-            ]
-            count = len(to_delete)
-            for timestamp in to_delete:
-                del self._time_points[timestamp]
+        return deleted_count
 
-        self._update_metadata()
-        return count
+    def clear_cache(self):
+        """清空内存缓存（释放内存）"""
+        self._time_points.clear()
+        self._cache_order.clear()
 
-    def get_time_points(self) -> List[TimePoint]:
-        """获取所有时间点（按时间排序）"""
-        points = list(self._time_points.values())
-        points.sort(key=lambda tp: tp.timestamp)
-        return points
+    def size(self) -> int:
+        """当前缓存大小"""
+        return len(self._time_points)
 
-    def get_timestamps(self) -> List[datetime]:
-        """获取所有时间戳（排序后）"""
-        timestamps = list(self._time_points.keys())
-        timestamps.sort()
-        return timestamps
-
-    def has_time_point(self, timestamp: datetime) -> bool:
-        """检查是否存在指定时间点"""
-        return timestamp in self._time_points
-
-    def get_time_series(self, key: str) -> List[Dict[str, Any]]:
-        """
-        获取指定键的时间序列数据
-
-        Args:
-            key: 数据键名
-
-        Returns:
-            时间序列数据：[{timestamp: ..., value: ...}, ...]
-        """
-        series = []
-
-        for time_point in self.get_time_points():
-            if key in time_point.data:
-                series.append({
-                    'timestamp': time_point.timestamp,
-                    'value': time_point.data[key]
-                })
-
-        return series
-
-    def _update_metadata(self):
-        """更新元数据"""
-        self.metadata['time_point_count'] = len(self._time_points)
-        self.metadata['updated_at'] = datetime.now()
-
-        # 更新时间范围
-        if self._time_points:
-            timestamps = self.get_timestamps()
-            self.metadata['time_range'] = {
-                'start': timestamps[0].isoformat(),
-                'end': timestamps[-1].isoformat(),
-                'duration_days': (timestamps[-1] - timestamps[0]).days
-            }
-        else:
-            self.metadata['time_range'] = None
-
-    def to_dict(self) -> Dict[str, Any]:
-        """转换为字典"""
-        time_points_dict = {}
-        for timestamp, time_point in self._time_points.items():
-            time_points_dict[timestamp.isoformat()] = time_point.to_dict()
-
+    def to_dict(self) -> Dict:
+        """序列化（只序列化数据，不序列化存储连接）"""
         return {
             'object_id': self.object_id,
-            'object_type': self.object_type,
-            'metadata': self.metadata,
-            'time_points': time_points_dict
+            'dimension': self.dimension,
+            'time_points': [
+                point.to_dict() for point in self._time_points.values()
+            ]
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'Timeline':
-        """从字典创建"""
+    def from_dict(
+        cls,
+        data: Dict,
+        storage: Optional[DataStoreAdapter] = None,
+        tree_id: Optional[str] = None
+    ) -> 'Timeline':
+        """
+        反序列化
+
+        Args:
+            data: 序列化数据
+            storage: 存储适配器（反序列化后可以接入）
+            tree_id: 树ID
+        """
         timeline = cls(
             object_id=data['object_id'],
-            object_type=data['object_type']
+            dimension=data['dimension'],
+            storage=storage,
+            tree_id=tree_id
         )
 
-        timeline.metadata = data['metadata']
-
-        # 恢复时间点
-        for time_str, tp_data in data['time_points'].items():
-            timestamp = datetime.fromisoformat(time_str)
-            time_point = TimePoint.from_dict(tp_data)
-            timeline._time_points[timestamp] = time_point
+        # 恢复内存缓存
+        for point_data in data.get('time_points', []):
+            point = TimePoint.from_dict(point_data)
+            timeline._time_points[point.timestamp] = point
+            timeline._cache_order.append(point.timestamp)
 
         return timeline
 
-    def save_to_json(self, filepath: str) -> bool:
-        """保存到JSON文件"""
-        try:
-            with open(filepath, 'w', encoding='utf-8') as f:
-                json.dump(self.to_dict(), f, ensure_ascii=False, indent=2)
-            return True
-        except Exception as e:
-            raise TimeError(f"保存时间线失败: {e}")
-
-    @classmethod
-    def load_from_json(cls, filepath: str) -> 'Timeline':
-        """从JSON文件加载"""
-        try:
-            with open(filepath, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-            return cls.from_dict(data)
-        except Exception as e:
-            raise TimeError(f"加载时间线失败: {e}")
-
     def __len__(self) -> int:
-        """获取时间点数量"""
+        """历史数据总量（包括存储中的）"""
+        if self._storage and self._tree_id:
+            try:
+                min_t, max_t = self._storage.get_time_range(
+                    tree_id=self._tree_id,
+                    node_id=self.object_id,
+                    dimension=self.dimension
+                )
+                if min_t and max_t:
+                    # 这里简化处理，实际应该查询COUNT
+                    return len(self.get_time_range(limit=10000))
+            except:
+                pass
         return len(self._time_points)
 
-    def __contains__(self, timestamp: datetime) -> bool:
-        """检查是否包含时间点"""
-        return timestamp in self._time_points
-
-    def __str__(self) -> str:
-        return f"Timeline({self.object_id}, 时间点: {len(self)})"
+    def __repr__(self) -> str:
+        return f"Timeline(object={self.object_id}, dim={self.dimension}, cache={len(self._time_points)})"

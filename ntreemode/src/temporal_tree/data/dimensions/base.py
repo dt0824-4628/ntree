@@ -62,24 +62,19 @@ class BaseDimension(IDimension, ABC):
     def is_calculated(self) -> bool:
         return self._is_calculated
 
-    def validate(self, value: Any) -> bool:
-        """验证数据值"""
-        try:
-            # 检查类型
-            if not isinstance(value, self._data_type):
-                # 尝试类型转换
-                if self._data_type == float:
-                    float(value)
-                elif self._data_type == int:
-                    int(value)
-                else:
-                    return False
+    def validate(self, value: Any) -> Any:
+        """
+        验证数据，通过则返回原值，失败则抛出异常
 
-            # 调用具体的验证逻辑
-            return self._validate_impl(value)
+        Returns:
+            原始值（通过验证）
 
-        except (ValueError, TypeError):
-            return False
+        Raises:
+            ValueError: 验证失败
+        """
+        if not self._validate_impl(value):
+            raise ValueError(f"数据验证失败: {value}")
+        return value  # ✅ 返回原值，不是布尔值
 
     @abstractmethod
     def _validate_impl(self, value: Any) -> bool:
