@@ -1,0 +1,2272 @@
+{
+  "created_at": {
+    "__type__": "datetime",
+    "value": "2026-02-11T08:40:03.974375"
+  },
+  "node_data": {
+    "gas_tree_20260211_084004": {
+      "node_000000000006_l_三中_4_32": {
+        "metered_flow": [
+          {
+            "dimension": "metered_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 1181.0
+          }
+        ],
+        "standard_flow": [
+          {
+            "dimension": "standard_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 1181.0
+          }
+        ]
+      },
+      "node_000000000014_l_二中_4_33": {
+        "metered_flow": [
+          {
+            "dimension": "metered_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 477.0
+          }
+        ],
+        "standard_flow": [
+          {
+            "dimension": "standard_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 477.0
+          }
+        ]
+      },
+      "node_000000000017_l_彭阳宾馆餐饮_4_30": {
+        "metered_flow": [
+          {
+            "dimension": "metered_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 2551.0
+          }
+        ],
+        "standard_flow": [
+          {
+            "dimension": "standard_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 2551.0
+          }
+        ]
+      },
+      "node_000000000020_l_四中_4_31": {
+        "metered_flow": [
+          {
+            "dimension": "metered_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 0.0
+          }
+        ],
+        "standard_flow": [
+          {
+            "dimension": "standard_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 0.0
+          }
+        ]
+      },
+      "node_000000000026_l明皇酒店锅炉房2_4_28": {
+        "metered_flow": [
+          {
+            "dimension": "metered_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 3.0
+          }
+        ],
+        "standard_flow": [
+          {
+            "dimension": "standard_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 3.0
+          }
+        ]
+      },
+      "node_000000000028_l_明皇酒店锅炉房1_4_29": {
+        "metered_flow": [
+          {
+            "dimension": "metered_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 0.0
+          }
+        ],
+        "standard_flow": [
+          {
+            "dimension": "standard_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 0.0
+          }
+        ]
+      },
+      "node_000000000032_l_一中_4_34": {
+        "metered_flow": [
+          {
+            "dimension": "metered_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 1163.0
+          }
+        ],
+        "standard_flow": [
+          {
+            "dimension": "standard_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 1163.0
+          }
+        ]
+      },
+      "node_00000001_l_县医院锅炉房副路_4_40": {
+        "metered_flow": [
+          {
+            "dimension": "metered_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 0.0
+          }
+        ],
+        "standard_flow": [
+          {
+            "dimension": "standard_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 0.0
+          }
+        ]
+      },
+      "node_00037_l_云雾山主路_4_17": {
+        "metered_flow": [
+          {
+            "dimension": "metered_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 3567.0
+          }
+        ],
+        "standard_flow": [
+          {
+            "dimension": "standard_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 3567.0
+          }
+        ]
+      },
+      "node_0034_l_佳利源薯业副路_4_19": {
+        "metered_flow": [
+          {
+            "dimension": "metered_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 64750.0
+          }
+        ],
+        "standard_flow": [
+          {
+            "dimension": "standard_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 64750.0
+          }
+        ]
+      },
+      "node_10008_l_美臣纺织_主__4_15": {
+        "metered_flow": [
+          {
+            "dimension": "metered_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 67938.0
+          }
+        ],
+        "standard_flow": [
+          {
+            "dimension": "standard_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 67938.0
+          }
+        ]
+      },
+      "node_10009_l_美臣纺织_副__4_14": {
+        "metered_flow": [
+          {
+            "dimension": "metered_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 0.0
+          }
+        ],
+        "standard_flow": [
+          {
+            "dimension": "standard_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 0.0
+          }
+        ]
+      },
+      "node_10924_l_职中_4_47": {
+        "metered_flow": [
+          {
+            "dimension": "metered_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 789.0
+          }
+        ],
+        "standard_flow": [
+          {
+            "dimension": "standard_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 789.0
+          }
+        ]
+      },
+      "node_11892_l_洗士莱洗涤厂_4_46": {
+        "metered_flow": [
+          {
+            "dimension": "metered_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 446.0
+          }
+        ],
+        "standard_flow": [
+          {
+            "dimension": "standard_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 446.0
+          }
+        ]
+      },
+      "node_2541_l_彭阳宾馆锅炉房_4_22": {
+        "metered_flow": [
+          {
+            "dimension": "metered_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 4416.0
+          }
+        ],
+        "standard_flow": [
+          {
+            "dimension": "standard_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 4416.0
+          }
+        ]
+      },
+      "node_2815_l_聚丰源驾校餐厅_4_35": {
+        "metered_flow": [
+          {
+            "dimension": "metered_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 1507.0
+          }
+        ],
+        "standard_flow": [
+          {
+            "dimension": "standard_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 1507.0
+          }
+        ]
+      },
+      "node_2830_l_茹河饭店_4_36": {
+        "metered_flow": [
+          {
+            "dimension": "metered_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 10.0
+          }
+        ],
+        "standard_flow": [
+          {
+            "dimension": "standard_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 10.0
+          }
+        ]
+      },
+      "node_2866_l_污水处理厂主路_4_21": {
+        "metered_flow": [
+          {
+            "dimension": "metered_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 0.0
+          }
+        ],
+        "standard_flow": [
+          {
+            "dimension": "standard_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 0.0
+          }
+        ]
+      },
+      "node_2867_l_污水处理厂副路_4_20": {
+        "metered_flow": [
+          {
+            "dimension": "metered_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 0.0
+          }
+        ],
+        "standard_flow": [
+          {
+            "dimension": "standard_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 0.0
+          }
+        ]
+      },
+      "node_33013873_l_餐厨垃圾处理厂主路_4_44": {
+        "metered_flow": [
+          {
+            "dimension": "metered_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 3647.0
+          }
+        ],
+        "standard_flow": [
+          {
+            "dimension": "standard_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 3647.0
+          }
+        ]
+      },
+      "node_3910_l_云雾山副路_4_16": {
+        "metered_flow": [
+          {
+            "dimension": "metered_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 0.0
+          }
+        ],
+        "standard_flow": [
+          {
+            "dimension": "standard_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 0.0
+          }
+        ]
+      },
+      "node_4194_l_妇幼保健院主路_4_39": {
+        "metered_flow": [
+          {
+            "dimension": "metered_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 0.0
+          }
+        ],
+        "standard_flow": [
+          {
+            "dimension": "standard_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 0.0
+          }
+        ]
+      },
+      "node_4195_l_妇幼保健院副路_4_38": {
+        "metered_flow": [
+          {
+            "dimension": "metered_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 0.0
+          }
+        ],
+        "standard_flow": [
+          {
+            "dimension": "standard_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 0.0
+          }
+        ]
+      },
+      "node_4932_l_佳利源薯业主路_4_18": {
+        "metered_flow": [
+          {
+            "dimension": "metered_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 0.0
+          }
+        ],
+        "standard_flow": [
+          {
+            "dimension": "standard_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 0.0
+          }
+        ]
+      },
+      "node_5157_l_采油九厂_4_41": {
+        "metered_flow": [
+          {
+            "dimension": "metered_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 622.0
+          }
+        ],
+        "standard_flow": [
+          {
+            "dimension": "standard_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 622.0
+          }
+        ]
+      },
+      "node_6921_l_春城酒店_4_37": {
+        "metered_flow": [
+          {
+            "dimension": "metered_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 1731.0
+          }
+        ],
+        "standard_flow": [
+          {
+            "dimension": "standard_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 1731.0
+          }
+        ]
+      },
+      "node_7668_l_彭阳县第五中学主路_4_45": {
+        "metered_flow": [
+          {
+            "dimension": "metered_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 1282.0
+          }
+        ],
+        "standard_flow": [
+          {
+            "dimension": "standard_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 1282.0
+          }
+        ]
+      },
+      "node_7669_l_彭阳县第五中学副路_4_43": {
+        "metered_flow": [
+          {
+            "dimension": "metered_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 1478.0
+          }
+        ],
+        "standard_flow": [
+          {
+            "dimension": "standard_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 1478.0
+          }
+        ]
+      },
+      "node_7822_l_餐厨垃圾厂副路_4_23": {
+        "metered_flow": [
+          {
+            "dimension": "metered_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 0.0
+          }
+        ],
+        "standard_flow": [
+          {
+            "dimension": "standard_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 0.0
+          }
+        ]
+      },
+      "node_7844_l_梦怡香餐饮_4_42": {
+        "metered_flow": [
+          {
+            "dimension": "metered_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 2883.0
+          }
+        ],
+        "standard_flow": [
+          {
+            "dimension": "standard_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 2883.0
+          }
+        ]
+      },
+      "node_9462_l_微元素食品主路_4_24": {
+        "metered_flow": [
+          {
+            "dimension": "metered_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 4465.0
+          }
+        ],
+        "standard_flow": [
+          {
+            "dimension": "standard_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 4465.0
+          }
+        ]
+      },
+      "node_9463_l_微元素食品副路_4_25": {
+        "metered_flow": [
+          {
+            "dimension": "metered_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 0.0
+          }
+        ],
+        "standard_flow": [
+          {
+            "dimension": "standard_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 0.0
+          }
+        ]
+      },
+      "node_9470_l_美华玻璃制品主路_4_26": {
+        "metered_flow": [
+          {
+            "dimension": "metered_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 20590.0
+          }
+        ],
+        "standard_flow": [
+          {
+            "dimension": "standard_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 20590.0
+          }
+        ]
+      },
+      "node_9470_l_美华玻璃制品副路_4_27": {
+        "metered_flow": [
+          {
+            "dimension": "metered_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 0.0
+          }
+        ],
+        "standard_flow": [
+          {
+            "dimension": "standard_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 0.0
+          }
+        ]
+      },
+      "node_s001_l_上游结算1_4_4": {
+        "metered_flow": [
+          {
+            "dimension": "metered_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 543542.0
+          }
+        ],
+        "standard_flow": [
+          {
+            "dimension": "standard_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 543542.0
+          }
+        ]
+      },
+      "node_s002_l_上游结算2_4_3": {
+        "metered_flow": [
+          {
+            "dimension": "metered_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 0.0
+          }
+        ],
+        "standard_flow": [
+          {
+            "dimension": "standard_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 0.0
+          }
+        ]
+      },
+      "node_tag_彭阳_加气站一支路标况累流量_4_51": {
+        "metered_flow": [
+          {
+            "dimension": "metered_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 95377.0
+          }
+        ],
+        "standard_flow": [
+          {
+            "dimension": "standard_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 95377.0
+          }
+        ]
+      },
+      "node_tag_彭阳_加气站二支路标况累流量_4_50": {
+        "metered_flow": [
+          {
+            "dimension": "metered_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 4216.0
+          }
+        ],
+        "standard_flow": [
+          {
+            "dimension": "standard_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 4216.0
+          }
+        ]
+      },
+      "node_tag_彭阳_城区一支路标况累流量_4_7": {
+        "metered_flow": [
+          {
+            "dimension": "metered_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 430974.56
+          }
+        ],
+        "standard_flow": [
+          {
+            "dimension": "standard_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 430974.56
+          }
+        ]
+      },
+      "node_tag_彭阳_城区二支路标况累流量_4_8": {
+        "metered_flow": [
+          {
+            "dimension": "metered_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 0.0
+          }
+        ],
+        "standard_flow": [
+          {
+            "dimension": "standard_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 0.0
+          }
+        ]
+      },
+      "node_z001_l_加气站销售_4_54": {
+        "metered_flow": [
+          {
+            "dimension": "metered_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 98676.97
+          }
+        ],
+        "standard_flow": [
+          {
+            "dimension": "standard_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 98676.97
+          }
+        ]
+      },
+      "node_上游结算_2_1": {
+        "metered_flow": [
+          {
+            "dimension": "metered_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 543542.0
+          }
+        ],
+        "standard_flow": [
+          {
+            "dimension": "standard_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 543542.0
+          }
+        ]
+      },
+      "node_加气站_2_48": {
+        "metered_flow": [
+          {
+            "dimension": "metered_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 99593.0
+          }
+        ],
+        "standard_flow": [
+          {
+            "dimension": "standard_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 99593.0
+          }
+        ]
+      },
+      "node_加气站终端_2_52": {
+        "metered_flow": [
+          {
+            "dimension": "metered_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 98676.97
+          }
+        ],
+        "standard_flow": [
+          {
+            "dimension": "standard_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 98676.97
+          }
+        ]
+      },
+      "node_卡表_3_11": {
+        "metered_flow": [
+          {
+            "dimension": "metered_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 6581.12
+          }
+        ],
+        "standard_flow": [
+          {
+            "dimension": "standard_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 5455.85
+          }
+        ]
+      },
+      "node_场站设备_3_49": {
+        "metered_flow": [
+          {
+            "dimension": "metered_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 543542.0
+          },
+          {
+            "dimension": "metered_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 430974.56
+          },
+          {
+            "dimension": "metered_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 99593.0
+          }
+        ],
+        "standard_flow": [
+          {
+            "dimension": "standard_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 543542.0
+          },
+          {
+            "dimension": "standard_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 430974.56
+          },
+          {
+            "dimension": "standard_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 99593.0
+          }
+        ]
+      },
+      "node_城区站输_2_5": {
+        "metered_flow": [
+          {
+            "dimension": "metered_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 430974.56
+          }
+        ],
+        "standard_flow": [
+          {
+            "dimension": "standard_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 430974.56
+          }
+        ]
+      },
+      "node_城区终端_2_9": {
+        "metered_flow": [
+          {
+            "dimension": "metered_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 443352.89
+          }
+        ],
+        "standard_flow": [
+          {
+            "dimension": "standard_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 399265.11
+          }
+        ]
+      },
+      "node_彭阳_1_0": {
+        "metered_flow": [
+          {
+            "dimension": "metered_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 1616139.42
+          }
+        ],
+        "standard_flow": [
+          {
+            "dimension": "standard_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 1572051.64
+          }
+        ]
+      },
+      "node_普表_3_10": {
+        "metered_flow": [
+          {
+            "dimension": "metered_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 116259.0
+          }
+        ],
+        "standard_flow": [
+          {
+            "dimension": "standard_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 96381.05
+          }
+        ]
+      },
+      "node_流量计_3_53": {
+        "metered_flow": [
+          {
+            "dimension": "metered_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 185496.0
+          },
+          {
+            "dimension": "metered_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 98676.97
+          }
+        ],
+        "standard_flow": [
+          {
+            "dimension": "standard_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 185496.0
+          },
+          {
+            "dimension": "standard_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 98676.97
+          }
+        ]
+      },
+      "node_远传表_3_12": {
+        "metered_flow": [
+          {
+            "dimension": "metered_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 135016.77
+          }
+        ],
+        "standard_flow": [
+          {
+            "dimension": "standard_flow",
+            "timestamp": {
+              "__type__": "datetime",
+              "value": "2025-11-15T12:00:00"
+            },
+            "value": 111932.21
+          }
+        ]
+      }
+    }
+  },
+  "nodes": {
+    "gas_tree_20260211_084004": {
+      "node_000000000006_l_三中_4_32": {
+        "created_at": {
+          "__type__": "datetime",
+          "value": "2026-02-11T08:40:04.279076"
+        },
+        "ip_address": "212.145.22.3",
+        "level": 4,
+        "metadata": {
+          "has_data": true,
+          "import_source": "excel",
+          "raw_name": "        000000000006+L+三中",
+          "row_index": 32
+        },
+        "name": "000000000006+L+三中",
+        "node_id": "node_000000000006_l_三中_4_32",
+        "original_name": "        000000000006+L+三中",
+        "parent_id": "node_流量计_3_13",
+        "tree_id": "gas_tree_20260211_084004"
+      },
+      "node_000000000014_l_二中_4_33": {
+        "created_at": {
+          "__type__": "datetime",
+          "value": "2026-02-11T08:40:04.279076"
+        },
+        "ip_address": "105.22.53.0",
+        "level": 4,
+        "metadata": {
+          "has_data": true,
+          "import_source": "excel",
+          "raw_name": "        000000000014+L+二中",
+          "row_index": 33
+        },
+        "name": "000000000014+L+二中",
+        "node_id": "node_000000000014_l_二中_4_33",
+        "original_name": "        000000000014+L+二中",
+        "parent_id": "node_流量计_3_13",
+        "tree_id": "gas_tree_20260211_084004"
+      },
+      "node_000000000017_l_彭阳宾馆餐饮_4_30": {
+        "created_at": {
+          "__type__": "datetime",
+          "value": "2026-02-11T08:40:04.279076"
+        },
+        "ip_address": "217.214.117.219",
+        "level": 4,
+        "metadata": {
+          "has_data": true,
+          "import_source": "excel",
+          "raw_name": "        000000000017+L+彭阳宾馆餐饮",
+          "row_index": 30
+        },
+        "name": "000000000017+L+彭阳宾馆餐饮",
+        "node_id": "node_000000000017_l_彭阳宾馆餐饮_4_30",
+        "original_name": "        000000000017+L+彭阳宾馆餐饮",
+        "parent_id": "node_流量计_3_13",
+        "tree_id": "gas_tree_20260211_084004"
+      },
+      "node_000000000020_l_四中_4_31": {
+        "created_at": {
+          "__type__": "datetime",
+          "value": "2026-02-11T08:40:04.279076"
+        },
+        "ip_address": "145.190.248.224",
+        "level": 4,
+        "metadata": {
+          "has_data": true,
+          "import_source": "excel",
+          "raw_name": "        000000000020+L+四中",
+          "row_index": 31
+        },
+        "name": "000000000020+L+四中",
+        "node_id": "node_000000000020_l_四中_4_31",
+        "original_name": "        000000000020+L+四中",
+        "parent_id": "node_流量计_3_13",
+        "tree_id": "gas_tree_20260211_084004"
+      },
+      "node_000000000026_l明皇酒店锅炉房2_4_28": {
+        "created_at": {
+          "__type__": "datetime",
+          "value": "2026-02-11T08:40:04.279076"
+        },
+        "ip_address": "76.229.224.73",
+        "level": 4,
+        "metadata": {
+          "has_data": true,
+          "import_source": "excel",
+          "raw_name": "        000000000026+L明皇酒店锅炉房2",
+          "row_index": 28
+        },
+        "name": "000000000026+L明皇酒店锅炉房2",
+        "node_id": "node_000000000026_l明皇酒店锅炉房2_4_28",
+        "original_name": "        000000000026+L明皇酒店锅炉房2",
+        "parent_id": "node_流量计_3_13",
+        "tree_id": "gas_tree_20260211_084004"
+      },
+      "node_000000000028_l_明皇酒店锅炉房1_4_29": {
+        "created_at": {
+          "__type__": "datetime",
+          "value": "2026-02-11T08:40:04.279076"
+        },
+        "ip_address": "51.247.124.135",
+        "level": 4,
+        "metadata": {
+          "has_data": true,
+          "import_source": "excel",
+          "raw_name": "        000000000028+L+明皇酒店锅炉房1",
+          "row_index": 29
+        },
+        "name": "000000000028+L+明皇酒店锅炉房1",
+        "node_id": "node_000000000028_l_明皇酒店锅炉房1_4_29",
+        "original_name": "        000000000028+L+明皇酒店锅炉房1",
+        "parent_id": "node_流量计_3_13",
+        "tree_id": "gas_tree_20260211_084004"
+      },
+      "node_000000000032_l_一中_4_34": {
+        "created_at": {
+          "__type__": "datetime",
+          "value": "2026-02-11T08:40:04.279076"
+        },
+        "ip_address": "214.176.63.0",
+        "level": 4,
+        "metadata": {
+          "has_data": true,
+          "import_source": "excel",
+          "raw_name": "        000000000032+L+一中",
+          "row_index": 34
+        },
+        "name": "000000000032+L+一中",
+        "node_id": "node_000000000032_l_一中_4_34",
+        "original_name": "        000000000032+L+一中",
+        "parent_id": "node_流量计_3_13",
+        "tree_id": "gas_tree_20260211_084004"
+      },
+      "node_00000001_l_县医院锅炉房副路_4_40": {
+        "created_at": {
+          "__type__": "datetime",
+          "value": "2026-02-11T08:40:04.279076"
+        },
+        "ip_address": "40.95.232.100",
+        "level": 4,
+        "metadata": {
+          "has_data": true,
+          "import_source": "excel",
+          "raw_name": "        00000001+L+县医院锅炉房副路",
+          "row_index": 40
+        },
+        "name": "00000001+L+县医院锅炉房副路",
+        "node_id": "node_00000001_l_县医院锅炉房副路_4_40",
+        "original_name": "        00000001+L+县医院锅炉房副路",
+        "parent_id": "node_流量计_3_13",
+        "tree_id": "gas_tree_20260211_084004"
+      },
+      "node_00037_l_云雾山主路_4_17": {
+        "created_at": {
+          "__type__": "datetime",
+          "value": "2026-02-11T08:40:04.279076"
+        },
+        "ip_address": "204.11.191.169",
+        "level": 4,
+        "metadata": {
+          "has_data": true,
+          "import_source": "excel",
+          "raw_name": "        00037+L+云雾山主路",
+          "row_index": 17
+        },
+        "name": "00037+L+云雾山主路",
+        "node_id": "node_00037_l_云雾山主路_4_17",
+        "original_name": "        00037+L+云雾山主路",
+        "parent_id": "node_流量计_3_13",
+        "tree_id": "gas_tree_20260211_084004"
+      },
+      "node_0034_l_佳利源薯业副路_4_19": {
+        "created_at": {
+          "__type__": "datetime",
+          "value": "2026-02-11T08:40:04.279076"
+        },
+        "ip_address": "159.201.243.106",
+        "level": 4,
+        "metadata": {
+          "has_data": true,
+          "import_source": "excel",
+          "raw_name": "        0034+L+佳利源薯业副路",
+          "row_index": 19
+        },
+        "name": "0034+L+佳利源薯业副路",
+        "node_id": "node_0034_l_佳利源薯业副路_4_19",
+        "original_name": "        0034+L+佳利源薯业副路",
+        "parent_id": "node_流量计_3_13",
+        "tree_id": "gas_tree_20260211_084004"
+      },
+      "node_10008_l_美臣纺织_主__4_15": {
+        "created_at": {
+          "__type__": "datetime",
+          "value": "2026-02-11T08:40:04.279076"
+        },
+        "ip_address": "2.123.50.201",
+        "level": 4,
+        "metadata": {
+          "has_data": true,
+          "import_source": "excel",
+          "raw_name": "        10008+L+美臣纺织（主）",
+          "row_index": 15
+        },
+        "name": "10008+L+美臣纺织（主）",
+        "node_id": "node_10008_l_美臣纺织_主__4_15",
+        "original_name": "        10008+L+美臣纺织（主）",
+        "parent_id": "node_流量计_3_13",
+        "tree_id": "gas_tree_20260211_084004"
+      },
+      "node_10009_l_美臣纺织_副__4_14": {
+        "created_at": {
+          "__type__": "datetime",
+          "value": "2026-02-11T08:40:04.279076"
+        },
+        "ip_address": "72.160.206.151",
+        "level": 4,
+        "metadata": {
+          "has_data": true,
+          "import_source": "excel",
+          "raw_name": "        10009+L+美臣纺织（副）",
+          "row_index": 14
+        },
+        "name": "10009+L+美臣纺织（副）",
+        "node_id": "node_10009_l_美臣纺织_副__4_14",
+        "original_name": "        10009+L+美臣纺织（副）",
+        "parent_id": "node_流量计_3_13",
+        "tree_id": "gas_tree_20260211_084004"
+      },
+      "node_10924_l_职中_4_47": {
+        "created_at": {
+          "__type__": "datetime",
+          "value": "2026-02-11T08:40:04.279076"
+        },
+        "ip_address": "90.193.220.77",
+        "level": 4,
+        "metadata": {
+          "has_data": true,
+          "import_source": "excel",
+          "raw_name": "        10924+L+职中",
+          "row_index": 47
+        },
+        "name": "10924+L+职中",
+        "node_id": "node_10924_l_职中_4_47",
+        "original_name": "        10924+L+职中",
+        "parent_id": "node_流量计_3_13",
+        "tree_id": "gas_tree_20260211_084004"
+      },
+      "node_11892_l_洗士莱洗涤厂_4_46": {
+        "created_at": {
+          "__type__": "datetime",
+          "value": "2026-02-11T08:40:04.279076"
+        },
+        "ip_address": "161.40.59.70",
+        "level": 4,
+        "metadata": {
+          "has_data": true,
+          "import_source": "excel",
+          "raw_name": "        11892+L+洗士莱洗涤厂",
+          "row_index": 46
+        },
+        "name": "11892+L+洗士莱洗涤厂",
+        "node_id": "node_11892_l_洗士莱洗涤厂_4_46",
+        "original_name": "        11892+L+洗士莱洗涤厂",
+        "parent_id": "node_流量计_3_13",
+        "tree_id": "gas_tree_20260211_084004"
+      },
+      "node_2541_l_彭阳宾馆锅炉房_4_22": {
+        "created_at": {
+          "__type__": "datetime",
+          "value": "2026-02-11T08:40:04.279076"
+        },
+        "ip_address": "103.48.107.226",
+        "level": 4,
+        "metadata": {
+          "has_data": true,
+          "import_source": "excel",
+          "raw_name": "        2541+L+彭阳宾馆锅炉房",
+          "row_index": 22
+        },
+        "name": "2541+L+彭阳宾馆锅炉房",
+        "node_id": "node_2541_l_彭阳宾馆锅炉房_4_22",
+        "original_name": "        2541+L+彭阳宾馆锅炉房",
+        "parent_id": "node_流量计_3_13",
+        "tree_id": "gas_tree_20260211_084004"
+      },
+      "node_2815_l_聚丰源驾校餐厅_4_35": {
+        "created_at": {
+          "__type__": "datetime",
+          "value": "2026-02-11T08:40:04.279076"
+        },
+        "ip_address": "83.120.82.129",
+        "level": 4,
+        "metadata": {
+          "has_data": true,
+          "import_source": "excel",
+          "raw_name": "        2815+L+聚丰源驾校餐厅",
+          "row_index": 35
+        },
+        "name": "2815+L+聚丰源驾校餐厅",
+        "node_id": "node_2815_l_聚丰源驾校餐厅_4_35",
+        "original_name": "        2815+L+聚丰源驾校餐厅",
+        "parent_id": "node_流量计_3_13",
+        "tree_id": "gas_tree_20260211_084004"
+      },
+      "node_2830_l_茹河饭店_4_36": {
+        "created_at": {
+          "__type__": "datetime",
+          "value": "2026-02-11T08:40:04.279076"
+        },
+        "ip_address": "146.72.147.72",
+        "level": 4,
+        "metadata": {
+          "has_data": true,
+          "import_source": "excel",
+          "raw_name": "        2830+L+茹河饭店",
+          "row_index": 36
+        },
+        "name": "2830+L+茹河饭店",
+        "node_id": "node_2830_l_茹河饭店_4_36",
+        "original_name": "        2830+L+茹河饭店",
+        "parent_id": "node_流量计_3_13",
+        "tree_id": "gas_tree_20260211_084004"
+      },
+      "node_2866_l_污水处理厂主路_4_21": {
+        "created_at": {
+          "__type__": "datetime",
+          "value": "2026-02-11T08:40:04.279076"
+        },
+        "ip_address": "163.235.155.181",
+        "level": 4,
+        "metadata": {
+          "has_data": true,
+          "import_source": "excel",
+          "raw_name": "        2866+L+污水处理厂主路",
+          "row_index": 21
+        },
+        "name": "2866+L+污水处理厂主路",
+        "node_id": "node_2866_l_污水处理厂主路_4_21",
+        "original_name": "        2866+L+污水处理厂主路",
+        "parent_id": "node_流量计_3_13",
+        "tree_id": "gas_tree_20260211_084004"
+      },
+      "node_2867_l_污水处理厂副路_4_20": {
+        "created_at": {
+          "__type__": "datetime",
+          "value": "2026-02-11T08:40:04.279076"
+        },
+        "ip_address": "60.221.147.18",
+        "level": 4,
+        "metadata": {
+          "has_data": true,
+          "import_source": "excel",
+          "raw_name": "        2867+L+污水处理厂副路",
+          "row_index": 20
+        },
+        "name": "2867+L+污水处理厂副路",
+        "node_id": "node_2867_l_污水处理厂副路_4_20",
+        "original_name": "        2867+L+污水处理厂副路",
+        "parent_id": "node_流量计_3_13",
+        "tree_id": "gas_tree_20260211_084004"
+      },
+      "node_33013873_l_餐厨垃圾处理厂主路_4_44": {
+        "created_at": {
+          "__type__": "datetime",
+          "value": "2026-02-11T08:40:04.279076"
+        },
+        "ip_address": "47.210.228.123",
+        "level": 4,
+        "metadata": {
+          "has_data": true,
+          "import_source": "excel",
+          "raw_name": "        33013873+L+餐厨垃圾处理厂主路",
+          "row_index": 44
+        },
+        "name": "33013873+L+餐厨垃圾处理厂主路",
+        "node_id": "node_33013873_l_餐厨垃圾处理厂主路_4_44",
+        "original_name": "        33013873+L+餐厨垃圾处理厂主路",
+        "parent_id": "node_流量计_3_13",
+        "tree_id": "gas_tree_20260211_084004"
+      },
+      "node_3910_l_云雾山副路_4_16": {
+        "created_at": {
+          "__type__": "datetime",
+          "value": "2026-02-11T08:40:04.279076"
+        },
+        "ip_address": "169.71.180.2",
+        "level": 4,
+        "metadata": {
+          "has_data": true,
+          "import_source": "excel",
+          "raw_name": "        3910+L+云雾山副路",
+          "row_index": 16
+        },
+        "name": "3910+L+云雾山副路",
+        "node_id": "node_3910_l_云雾山副路_4_16",
+        "original_name": "        3910+L+云雾山副路",
+        "parent_id": "node_流量计_3_13",
+        "tree_id": "gas_tree_20260211_084004"
+      },
+      "node_4194_l_妇幼保健院主路_4_39": {
+        "created_at": {
+          "__type__": "datetime",
+          "value": "2026-02-11T08:40:04.279076"
+        },
+        "ip_address": "140.44.254.17",
+        "level": 4,
+        "metadata": {
+          "has_data": true,
+          "import_source": "excel",
+          "raw_name": "        4194+L+妇幼保健院主路",
+          "row_index": 39
+        },
+        "name": "4194+L+妇幼保健院主路",
+        "node_id": "node_4194_l_妇幼保健院主路_4_39",
+        "original_name": "        4194+L+妇幼保健院主路",
+        "parent_id": "node_流量计_3_13",
+        "tree_id": "gas_tree_20260211_084004"
+      },
+      "node_4195_l_妇幼保健院副路_4_38": {
+        "created_at": {
+          "__type__": "datetime",
+          "value": "2026-02-11T08:40:04.279076"
+        },
+        "ip_address": "255.229.39.117",
+        "level": 4,
+        "metadata": {
+          "has_data": true,
+          "import_source": "excel",
+          "raw_name": "        4195+L+妇幼保健院副路",
+          "row_index": 38
+        },
+        "name": "4195+L+妇幼保健院副路",
+        "node_id": "node_4195_l_妇幼保健院副路_4_38",
+        "original_name": "        4195+L+妇幼保健院副路",
+        "parent_id": "node_流量计_3_13",
+        "tree_id": "gas_tree_20260211_084004"
+      },
+      "node_4932_l_佳利源薯业主路_4_18": {
+        "created_at": {
+          "__type__": "datetime",
+          "value": "2026-02-11T08:40:04.279076"
+        },
+        "ip_address": "51.37.170.4",
+        "level": 4,
+        "metadata": {
+          "has_data": true,
+          "import_source": "excel",
+          "raw_name": "        4932+L+佳利源薯业主路",
+          "row_index": 18
+        },
+        "name": "4932+L+佳利源薯业主路",
+        "node_id": "node_4932_l_佳利源薯业主路_4_18",
+        "original_name": "        4932+L+佳利源薯业主路",
+        "parent_id": "node_流量计_3_13",
+        "tree_id": "gas_tree_20260211_084004"
+      },
+      "node_5157_l_采油九厂_4_41": {
+        "created_at": {
+          "__type__": "datetime",
+          "value": "2026-02-11T08:40:04.279076"
+        },
+        "ip_address": "73.232.106.25",
+        "level": 4,
+        "metadata": {
+          "has_data": true,
+          "import_source": "excel",
+          "raw_name": "        5157+L+采油九厂",
+          "row_index": 41
+        },
+        "name": "5157+L+采油九厂",
+        "node_id": "node_5157_l_采油九厂_4_41",
+        "original_name": "        5157+L+采油九厂",
+        "parent_id": "node_流量计_3_13",
+        "tree_id": "gas_tree_20260211_084004"
+      },
+      "node_6921_l_春城酒店_4_37": {
+        "created_at": {
+          "__type__": "datetime",
+          "value": "2026-02-11T08:40:04.279076"
+        },
+        "ip_address": "56.122.69.225",
+        "level": 4,
+        "metadata": {
+          "has_data": true,
+          "import_source": "excel",
+          "raw_name": "        6921+L+春城酒店",
+          "row_index": 37
+        },
+        "name": "6921+L+春城酒店",
+        "node_id": "node_6921_l_春城酒店_4_37",
+        "original_name": "        6921+L+春城酒店",
+        "parent_id": "node_流量计_3_13",
+        "tree_id": "gas_tree_20260211_084004"
+      },
+      "node_7668_l_彭阳县第五中学主路_4_45": {
+        "created_at": {
+          "__type__": "datetime",
+          "value": "2026-02-11T08:40:04.279076"
+        },
+        "ip_address": "186.153.122.177",
+        "level": 4,
+        "metadata": {
+          "has_data": true,
+          "import_source": "excel",
+          "raw_name": "        7668+L+彭阳县第五中学主路",
+          "row_index": 45
+        },
+        "name": "7668+L+彭阳县第五中学主路",
+        "node_id": "node_7668_l_彭阳县第五中学主路_4_45",
+        "original_name": "        7668+L+彭阳县第五中学主路",
+        "parent_id": "node_流量计_3_13",
+        "tree_id": "gas_tree_20260211_084004"
+      },
+      "node_7669_l_彭阳县第五中学副路_4_43": {
+        "created_at": {
+          "__type__": "datetime",
+          "value": "2026-02-11T08:40:04.279076"
+        },
+        "ip_address": "151.133.183.227",
+        "level": 4,
+        "metadata": {
+          "has_data": true,
+          "import_source": "excel",
+          "raw_name": "        7669+L+彭阳县第五中学副路",
+          "row_index": 43
+        },
+        "name": "7669+L+彭阳县第五中学副路",
+        "node_id": "node_7669_l_彭阳县第五中学副路_4_43",
+        "original_name": "        7669+L+彭阳县第五中学副路",
+        "parent_id": "node_流量计_3_13",
+        "tree_id": "gas_tree_20260211_084004"
+      },
+      "node_7822_l_餐厨垃圾厂副路_4_23": {
+        "created_at": {
+          "__type__": "datetime",
+          "value": "2026-02-11T08:40:04.279076"
+        },
+        "ip_address": "8.178.187.204",
+        "level": 4,
+        "metadata": {
+          "has_data": true,
+          "import_source": "excel",
+          "raw_name": "        7822+L+餐厨垃圾厂副路",
+          "row_index": 23
+        },
+        "name": "7822+L+餐厨垃圾厂副路",
+        "node_id": "node_7822_l_餐厨垃圾厂副路_4_23",
+        "original_name": "        7822+L+餐厨垃圾厂副路",
+        "parent_id": "node_流量计_3_13",
+        "tree_id": "gas_tree_20260211_084004"
+      },
+      "node_7844_l_梦怡香餐饮_4_42": {
+        "created_at": {
+          "__type__": "datetime",
+          "value": "2026-02-11T08:40:04.279076"
+        },
+        "ip_address": "230.97.249.227",
+        "level": 4,
+        "metadata": {
+          "has_data": true,
+          "import_source": "excel",
+          "raw_name": "        7844+L+梦怡香餐饮",
+          "row_index": 42
+        },
+        "name": "7844+L+梦怡香餐饮",
+        "node_id": "node_7844_l_梦怡香餐饮_4_42",
+        "original_name": "        7844+L+梦怡香餐饮",
+        "parent_id": "node_流量计_3_13",
+        "tree_id": "gas_tree_20260211_084004"
+      },
+      "node_9462_l_微元素食品主路_4_24": {
+        "created_at": {
+          "__type__": "datetime",
+          "value": "2026-02-11T08:40:04.279076"
+        },
+        "ip_address": "231.24.5.212",
+        "level": 4,
+        "metadata": {
+          "has_data": true,
+          "import_source": "excel",
+          "raw_name": "        9462+L+微元素食品主路",
+          "row_index": 24
+        },
+        "name": "9462+L+微元素食品主路",
+        "node_id": "node_9462_l_微元素食品主路_4_24",
+        "original_name": "        9462+L+微元素食品主路",
+        "parent_id": "node_流量计_3_13",
+        "tree_id": "gas_tree_20260211_084004"
+      },
+      "node_9463_l_微元素食品副路_4_25": {
+        "created_at": {
+          "__type__": "datetime",
+          "value": "2026-02-11T08:40:04.279076"
+        },
+        "ip_address": "220.202.22.144",
+        "level": 4,
+        "metadata": {
+          "has_data": true,
+          "import_source": "excel",
+          "raw_name": "        9463+L+微元素食品副路",
+          "row_index": 25
+        },
+        "name": "9463+L+微元素食品副路",
+        "node_id": "node_9463_l_微元素食品副路_4_25",
+        "original_name": "        9463+L+微元素食品副路",
+        "parent_id": "node_流量计_3_13",
+        "tree_id": "gas_tree_20260211_084004"
+      },
+      "node_9470_l_美华玻璃制品主路_4_26": {
+        "created_at": {
+          "__type__": "datetime",
+          "value": "2026-02-11T08:40:04.279076"
+        },
+        "ip_address": "25.142.242.39",
+        "level": 4,
+        "metadata": {
+          "has_data": true,
+          "import_source": "excel",
+          "raw_name": "        9470+L+美华玻璃制品主路",
+          "row_index": 26
+        },
+        "name": "9470+L+美华玻璃制品主路",
+        "node_id": "node_9470_l_美华玻璃制品主路_4_26",
+        "original_name": "        9470+L+美华玻璃制品主路",
+        "parent_id": "node_流量计_3_13",
+        "tree_id": "gas_tree_20260211_084004"
+      },
+      "node_9470_l_美华玻璃制品副路_4_27": {
+        "created_at": {
+          "__type__": "datetime",
+          "value": "2026-02-11T08:40:04.279076"
+        },
+        "ip_address": "35.27.127.167",
+        "level": 4,
+        "metadata": {
+          "has_data": true,
+          "import_source": "excel",
+          "raw_name": "        9470+L+美华玻璃制品副路",
+          "row_index": 27
+        },
+        "name": "9470+L+美华玻璃制品副路",
+        "node_id": "node_9470_l_美华玻璃制品副路_4_27",
+        "original_name": "        9470+L+美华玻璃制品副路",
+        "parent_id": "node_流量计_3_13",
+        "tree_id": "gas_tree_20260211_084004"
+      },
+      "node_s001_l_上游结算1_4_4": {
+        "created_at": {
+          "__type__": "datetime",
+          "value": "2026-02-11T08:40:04.279076"
+        },
+        "ip_address": "178.211.57.65",
+        "level": 4,
+        "metadata": {
+          "has_data": true,
+          "import_source": "excel",
+          "raw_name": "        S001+L+上游结算1",
+          "row_index": 4
+        },
+        "name": "S001+L+上游结算1",
+        "node_id": "node_s001_l_上游结算1_4_4",
+        "original_name": "        S001+L+上游结算1",
+        "parent_id": "node_场站设备_3_2",
+        "tree_id": "gas_tree_20260211_084004"
+      },
+      "node_s002_l_上游结算2_4_3": {
+        "created_at": {
+          "__type__": "datetime",
+          "value": "2026-02-11T08:40:04.279076"
+        },
+        "ip_address": "65.180.173.102",
+        "level": 4,
+        "metadata": {
+          "has_data": true,
+          "import_source": "excel",
+          "raw_name": "        S002+L+上游结算2",
+          "row_index": 3
+        },
+        "name": "S002+L+上游结算2",
+        "node_id": "node_s002_l_上游结算2_4_3",
+        "original_name": "        S002+L+上游结算2",
+        "parent_id": "node_场站设备_3_2",
+        "tree_id": "gas_tree_20260211_084004"
+      },
+      "node_tag_彭阳_加气站一支路标况累流量_4_51": {
+        "created_at": {
+          "__type__": "datetime",
+          "value": "2026-02-11T08:40:04.279076"
+        },
+        "ip_address": "205.214.253.201",
+        "level": 4,
+        "metadata": {
+          "has_data": true,
+          "import_source": "excel",
+          "raw_name": "        Tag.彭阳.加气站一支路标况累流量",
+          "row_index": 51
+        },
+        "name": "Tag.彭阳.加气站一支路标况累流量",
+        "node_id": "node_tag_彭阳_加气站一支路标况累流量_4_51",
+        "original_name": "        Tag.彭阳.加气站一支路标况累流量",
+        "parent_id": "node_场站设备_3_49",
+        "tree_id": "gas_tree_20260211_084004"
+      },
+      "node_tag_彭阳_加气站二支路标况累流量_4_50": {
+        "created_at": {
+          "__type__": "datetime",
+          "value": "2026-02-11T08:40:04.279076"
+        },
+        "ip_address": "198.247.59.236",
+        "level": 4,
+        "metadata": {
+          "has_data": true,
+          "import_source": "excel",
+          "raw_name": "        Tag.彭阳.加气站二支路标况累流量",
+          "row_index": 50
+        },
+        "name": "Tag.彭阳.加气站二支路标况累流量",
+        "node_id": "node_tag_彭阳_加气站二支路标况累流量_4_50",
+        "original_name": "        Tag.彭阳.加气站二支路标况累流量",
+        "parent_id": "node_场站设备_3_49",
+        "tree_id": "gas_tree_20260211_084004"
+      },
+      "node_tag_彭阳_城区一支路标况累流量_4_7": {
+        "created_at": {
+          "__type__": "datetime",
+          "value": "2026-02-11T08:40:04.279076"
+        },
+        "ip_address": "48.45.62.92",
+        "level": 4,
+        "metadata": {
+          "has_data": true,
+          "import_source": "excel",
+          "raw_name": "        Tag.彭阳.城区一支路标况累流量",
+          "row_index": 7
+        },
+        "name": "Tag.彭阳.城区一支路标况累流量",
+        "node_id": "node_tag_彭阳_城区一支路标况累流量_4_7",
+        "original_name": "        Tag.彭阳.城区一支路标况累流量",
+        "parent_id": "node_场站设备_3_6",
+        "tree_id": "gas_tree_20260211_084004"
+      },
+      "node_tag_彭阳_城区二支路标况累流量_4_8": {
+        "created_at": {
+          "__type__": "datetime",
+          "value": "2026-02-11T08:40:04.279076"
+        },
+        "ip_address": "109.14.212.196",
+        "level": 4,
+        "metadata": {
+          "has_data": true,
+          "import_source": "excel",
+          "raw_name": "        Tag.彭阳.城区二支路标况累流量",
+          "row_index": 8
+        },
+        "name": "Tag.彭阳.城区二支路标况累流量",
+        "node_id": "node_tag_彭阳_城区二支路标况累流量_4_8",
+        "original_name": "        Tag.彭阳.城区二支路标况累流量",
+        "parent_id": "node_场站设备_3_6",
+        "tree_id": "gas_tree_20260211_084004"
+      },
+      "node_z001_l_加气站销售_4_54": {
+        "created_at": {
+          "__type__": "datetime",
+          "value": "2026-02-11T08:40:04.279076"
+        },
+        "ip_address": "44.5.234.60",
+        "level": 4,
+        "metadata": {
+          "has_data": true,
+          "import_source": "excel",
+          "raw_name": "        Z001+L+加气站销售",
+          "row_index": 54
+        },
+        "name": "Z001+L+加气站销售",
+        "node_id": "node_z001_l_加气站销售_4_54",
+        "original_name": "        Z001+L+加气站销售",
+        "parent_id": "node_流量计_3_53",
+        "tree_id": "gas_tree_20260211_084004"
+      },
+      "node_上游结算_2_1": {
+        "created_at": {
+          "__type__": "datetime",
+          "value": "2026-02-11T08:40:04.279076"
+        },
+        "ip_address": "140.243.165",
+        "level": 2,
+        "metadata": {
+          "has_data": true,
+          "import_source": "excel",
+          "raw_name": "    上游结算",
+          "row_index": 1
+        },
+        "name": "上游结算",
+        "node_id": "node_上游结算_2_1",
+        "original_name": "    上游结算",
+        "parent_id": "node_彭阳_1_0",
+        "tree_id": "gas_tree_20260211_084004"
+      },
+      "node_加气站_2_48": {
+        "created_at": {
+          "__type__": "datetime",
+          "value": "2026-02-11T08:40:04.279076"
+        },
+        "ip_address": "10.64.61",
+        "level": 2,
+        "metadata": {
+          "has_data": true,
+          "import_source": "excel",
+          "raw_name": "    加气站",
+          "row_index": 48
+        },
+        "name": "加气站",
+        "node_id": "node_加气站_2_48",
+        "original_name": "    加气站",
+        "parent_id": "node_彭阳_1_0",
+        "tree_id": "gas_tree_20260211_084004"
+      },
+      "node_加气站终端_2_52": {
+        "created_at": {
+          "__type__": "datetime",
+          "value": "2026-02-11T08:40:04.279076"
+        },
+        "ip_address": "121.184.134",
+        "level": 2,
+        "metadata": {
+          "has_data": true,
+          "import_source": "excel",
+          "raw_name": "    加气站终端",
+          "row_index": 52
+        },
+        "name": "加气站终端",
+        "node_id": "node_加气站终端_2_52",
+        "original_name": "    加气站终端",
+        "parent_id": "node_彭阳_1_0",
+        "tree_id": "gas_tree_20260211_084004"
+      },
+      "node_卡表_3_11": {
+        "created_at": {
+          "__type__": "datetime",
+          "value": "2026-02-11T08:40:04.279076"
+        },
+        "ip_address": "218.246.124.224",
+        "level": 3,
+        "metadata": {
+          "has_data": true,
+          "import_source": "excel",
+          "raw_name": "      卡表",
+          "row_index": 11
+        },
+        "name": "卡表",
+        "node_id": "node_卡表_3_11",
+        "original_name": "      卡表",
+        "parent_id": "node_城区终端_2_9",
+        "tree_id": "gas_tree_20260211_084004"
+      },
+      "node_场站设备_3_2": {
+        "created_at": {
+          "__type__": "datetime",
+          "value": "2026-02-11T08:40:04.279076"
+        },
+        "ip_address": "191.249.132.58",
+        "level": 3,
+        "metadata": {
+          "has_data": true,
+          "import_source": "excel",
+          "raw_name": "      场站设备",
+          "row_index": 2
+        },
+        "name": "场站设备",
+        "node_id": "node_场站设备_3_2",
+        "original_name": "      场站设备",
+        "parent_id": "node_上游结算_2_1",
+        "tree_id": "gas_tree_20260211_084004"
+      },
+      "node_场站设备_3_49": {
+        "created_at": {
+          "__type__": "datetime",
+          "value": "2026-02-11T08:40:04.279076"
+        },
+        "ip_address": "35.81.114.103",
+        "level": 3,
+        "metadata": {
+          "has_data": true,
+          "import_source": "excel",
+          "raw_name": "      场站设备",
+          "row_index": 49
+        },
+        "name": "场站设备",
+        "node_id": "node_场站设备_3_49",
+        "original_name": "      场站设备",
+        "parent_id": "node_加气站_2_48",
+        "tree_id": "gas_tree_20260211_084004"
+      },
+      "node_场站设备_3_6": {
+        "created_at": {
+          "__type__": "datetime",
+          "value": "2026-02-11T08:40:04.279076"
+        },
+        "ip_address": "41.49.103.140",
+        "level": 3,
+        "metadata": {
+          "has_data": true,
+          "import_source": "excel",
+          "raw_name": "      场站设备",
+          "row_index": 6
+        },
+        "name": "场站设备",
+        "node_id": "node_场站设备_3_6",
+        "original_name": "      场站设备",
+        "parent_id": "node_城区站输_2_5",
+        "tree_id": "gas_tree_20260211_084004"
+      },
+      "node_城区站输_2_5": {
+        "created_at": {
+          "__type__": "datetime",
+          "value": "2026-02-11T08:40:04.279076"
+        },
+        "ip_address": "93.144.160",
+        "level": 2,
+        "metadata": {
+          "has_data": true,
+          "import_source": "excel",
+          "raw_name": "    城区站输",
+          "row_index": 5
+        },
+        "name": "城区站输",
+        "node_id": "node_城区站输_2_5",
+        "original_name": "    城区站输",
+        "parent_id": "node_彭阳_1_0",
+        "tree_id": "gas_tree_20260211_084004"
+      },
+      "node_城区终端_2_9": {
+        "created_at": {
+          "__type__": "datetime",
+          "value": "2026-02-11T08:40:04.279076"
+        },
+        "ip_address": "147.50.84",
+        "level": 2,
+        "metadata": {
+          "has_data": true,
+          "import_source": "excel",
+          "raw_name": "    城区终端",
+          "row_index": 9
+        },
+        "name": "城区终端",
+        "node_id": "node_城区终端_2_9",
+        "original_name": "    城区终端",
+        "parent_id": "node_彭阳_1_0",
+        "tree_id": "gas_tree_20260211_084004"
+      },
+      "node_彭阳_1_0": {
+        "created_at": {
+          "__type__": "datetime",
+          "value": "2026-02-11T08:40:04.279076"
+        },
+        "ip_address": "251.90.0",
+        "level": 1,
+        "metadata": {
+          "has_data": true,
+          "import_source": "excel",
+          "raw_name": "  彭阳",
+          "row_index": 0
+        },
+        "name": "彭阳",
+        "node_id": "node_彭阳_1_0",
+        "original_name": "  彭阳",
+        "parent_id": null,
+        "tree_id": "gas_tree_20260211_084004"
+      },
+      "node_普表_3_10": {
+        "created_at": {
+          "__type__": "datetime",
+          "value": "2026-02-11T08:40:04.279076"
+        },
+        "ip_address": "24.32.124.193",
+        "level": 3,
+        "metadata": {
+          "has_data": true,
+          "import_source": "excel",
+          "raw_name": "      普表",
+          "row_index": 10
+        },
+        "name": "普表",
+        "node_id": "node_普表_3_10",
+        "original_name": "      普表",
+        "parent_id": "node_城区终端_2_9",
+        "tree_id": "gas_tree_20260211_084004"
+      },
+      "node_流量计_3_13": {
+        "created_at": {
+          "__type__": "datetime",
+          "value": "2026-02-11T08:40:04.279076"
+        },
+        "ip_address": "77.127.224.216",
+        "level": 3,
+        "metadata": {
+          "has_data": true,
+          "import_source": "excel",
+          "raw_name": "      流量计",
+          "row_index": 13
+        },
+        "name": "流量计",
+        "node_id": "node_流量计_3_13",
+        "original_name": "      流量计",
+        "parent_id": "node_城区终端_2_9",
+        "tree_id": "gas_tree_20260211_084004"
+      },
+      "node_流量计_3_53": {
+        "created_at": {
+          "__type__": "datetime",
+          "value": "2026-02-11T08:40:04.279076"
+        },
+        "ip_address": "183.49.175.235",
+        "level": 3,
+        "metadata": {
+          "has_data": true,
+          "import_source": "excel",
+          "raw_name": "      流量计",
+          "row_index": 53
+        },
+        "name": "流量计",
+        "node_id": "node_流量计_3_53",
+        "original_name": "      流量计",
+        "parent_id": "node_加气站终端_2_52",
+        "tree_id": "gas_tree_20260211_084004"
+      },
+      "node_远传表_3_12": {
+        "created_at": {
+          "__type__": "datetime",
+          "value": "2026-02-11T08:40:04.279076"
+        },
+        "ip_address": "184.211.104.168",
+        "level": 3,
+        "metadata": {
+          "has_data": true,
+          "import_source": "excel",
+          "raw_name": "      远传表",
+          "row_index": 12
+        },
+        "name": "远传表",
+        "node_id": "node_远传表_3_12",
+        "original_name": "      远传表",
+        "parent_id": "node_城区终端_2_9",
+        "tree_id": "gas_tree_20260211_084004"
+      }
+    }
+  },
+  "trees": {
+    "gas_tree_20260211_084004": {
+      "created_at": {
+        "__type__": "datetime",
+        "value": "2026-02-11T08:40:04.279076"
+      },
+      "description": "从Excel导入的燃气输差分析数据",
+      "metadata": {
+        "import_config": {
+          "auto_calculate_loss": true,
+          "use_midday": true
+        },
+        "import_time": "2026-02-11T08:40:04.279076"
+      },
+      "name": "燃气系统_2_10_1",
+      "node_count": 55,
+      "source": "excel_import",
+      "tree_id": "gas_tree_20260211_084004"
+    }
+  },
+  "version": "1.0"
+}
